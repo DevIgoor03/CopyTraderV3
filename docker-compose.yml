@@ -1,0 +1,41 @@
+# ─── Development: only infrastructure ────────────────────────────────────────
+# Run: docker-compose up -d
+# Then: npm run dev in /backend and /frontend
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ct_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       copytrader
+      POSTGRES_USER:     copytrader
+      POSTGRES_PASSWORD: copytrader123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U copytrader -d copytrader"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ct_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis123
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
