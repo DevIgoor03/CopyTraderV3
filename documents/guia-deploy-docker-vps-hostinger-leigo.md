@@ -185,10 +185,14 @@ cp .env.production .env.prod && nano .env.prod
 ### Backend não fica healthy
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.prod logs ct_backend --tail 100
+docker compose -f docker-compose.prod.yml --env-file .env.prod logs backend --tail 100
 ```
 
-Causas típicas: senha Postgres errada no `.env.prod`, variáveis ainda com `TROQUE_POR_...`, Postgres ainda a inicializar (espere 1 minuto e `docker compose ... restart ct_backend`).
+Causas típicas: senha Postgres errada no `.env.prod`, variáveis ainda com `TROQUE_POR_...`, Postgres ainda a inicializar (espere 1 minuto e `docker compose ... restart backend`).
+
+### Prisma no Docker: “openssl”, “Error load”, “not valid JSON”
+
+No **Alpine**, o Prisma precisa do binário certo (OpenSSL 3) e das libs no contentor. O projeto já define `binaryTargets` no `schema.prisma` e instala `openssl` + `libc6-compat` no `Dockerfile`. Atualize o código (`git pull`) e faça **`bash deploy.sh --no-cache`**.
 
 ### Página 502 no browser
 

@@ -2,6 +2,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# OpenSSL 3 + compat glibc/musl — necessário para o motor do Prisma no Alpine
+RUN apk add --no-cache openssl libc6-compat
+
 # Install dependencies first (layer cache)
 COPY package*.json ./
 COPY prisma ./prisma
@@ -20,8 +23,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# wget: healthcheck do Docker Compose (Alpine nem sempre expõe wget como esperado)
-RUN apk add --no-cache wget
+# wget + OpenSSL 3 (Prisma migrate / query engine no Alpine)
+RUN apk add --no-cache wget openssl libc6-compat
 
 # Install only production deps
 COPY package*.json ./
