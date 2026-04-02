@@ -28,7 +28,11 @@ info "Parando containers antigos..."
 docker compose -f docker-compose.prod.yml --env-file .env.prod down --remove-orphans 2>/dev/null || true
 
 # ─── Build images ─────────────────────────────────────────────────────────────
-info "Construindo imagens (sem cache)..."
+if [[ -n "$NO_CACHE" ]]; then
+  info "Construindo imagens (rebuild completo, sem cache)..."
+else
+  info "Construindo imagens..."
+fi
 docker compose -f docker-compose.prod.yml --env-file .env.prod build $NO_CACHE
 
 # ─── Start services ───────────────────────────────────────────────────────────

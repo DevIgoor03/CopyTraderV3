@@ -59,8 +59,8 @@ ssh root@SEU_IP_DA_VPS
 Faça upload do script ou cole diretamente:
 
 ```bash
-# Baixar e executar o script de setup
-curl -fsSL https://raw.githubusercontent.com/SEU_USUARIO/copytrader/main/setup-vps.sh | bash
+# Depois de clonar o repo (ver Passo 4), na pasta do projeto:
+cd /opt/copytrader && bash setup-vps.sh
 ```
 
 **OU** copie o conteúdo de `setup-vps.sh` e cole no terminal.
@@ -78,7 +78,7 @@ O script instala automaticamente:
 
 ```bash
 cd /opt/copytrader
-git clone https://github.com/SEU_USUARIO/copytrader.git .
+git clone https://github.com/DevIgoor03/CopyTraderV3.git .
 ```
 
 ### Opção B — Via SCP (do seu PC)
