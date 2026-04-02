@@ -102,6 +102,10 @@ services:
         condition: service_healthy
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      # Certificados Let's Encrypt no host (gerados por ssl-setup.sh na VPS)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - internal
     logging:

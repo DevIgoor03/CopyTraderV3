@@ -1,12 +1,14 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
 # CopyTrader — SSL com Let's Encrypt (após ter domínio apontado para VPS)
-# Uso: sudo bash ssl-setup.sh seudominio.com
+# Uso: sudo bash ssl-setup.sh seudominio.com [email-para-lets-encrypt@opcional]
+#      CERTBOT_EMAIL=voce@email.com sudo bash ssl-setup.sh seudominio.com
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
 DOMAIN="$1"
-[ -z "$DOMAIN" ] && echo "Uso: sudo bash ssl-setup.sh seudominio.com" && exit 1
+[ -z "$DOMAIN" ] && echo "Uso: sudo bash ssl-setup.sh seudominio.com [email-certbot@opcional]" && exit 1
+CERTBOT_EMAIL="${2:-${CERTBOT_EMAIL:-}}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
 info()    { echo -e "${CYAN}[SSL]${NC}  $1"; }
@@ -26,10 +28,18 @@ info "Parando frontend temporariamente para validação SSL..."
 docker stop ct_frontend 2>/dev/null || true
 
 # ─── Obter certificado ────────────────────────────────────────────────────────
-info "Obtendo certificado SSL para $DOMAIN..."
-certbot certonly --standalone -d "$DOMAIN" \
-  --non-interactive --agree-tos \
-  --register-unsafely-without-email
+info "Obtendo certificado SSL para $DOMAIN (+ www)..."
+CERT_ARGS=(-d "$DOMAIN")
+if [[ "$DOMAIN" != www.* ]]; then
+  CERT_ARGS+=(-d "www.$DOMAIN")
+fi
+if [ -n "$CERTBOT_EMAIL" ]; then
+  certbot certonly --standalone "${CERT_ARGS[@]}" \
+    --non-interactive --agree-tos --email "$CERTBOT_EMAIL" --no-eff-email
+else
+  certbot certonly --standalone "${CERT_ARGS[@]}" \
+    --non-interactive --agree-tos --register-unsafely-without-email
+fi
 
 # ─── Gerar nginx.conf com SSL ─────────────────────────────────────────────────
 info "Atualizando configuração Nginx com SSL..."

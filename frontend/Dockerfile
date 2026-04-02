@@ -23,9 +23,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built React app
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 80 443
 
+# Health via backend (evita falhar quando o Nginx em HTTPS redireciona só o domínio na porta 80)
 HEALTHCHECK --interval=30s --timeout=5s \
-  CMD wget -qO- http://localhost/api/health || exit 1
+  CMD wget -qO- http://backend:3001/api/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
