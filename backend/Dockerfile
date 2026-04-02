@@ -20,6 +20,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# wget: healthcheck do Docker Compose (Alpine nem sempre expõe wget como esperado)
+RUN apk add --no-cache wget
+
 # Install only production deps
 COPY package*.json ./
 RUN npm ci --only=production --no-cache && npm cache clean --force
