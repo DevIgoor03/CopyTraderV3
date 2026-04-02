@@ -31,6 +31,11 @@ async function bootstrap() {
   const app    = express();
   const server = http.createServer(app);
 
+  // Nginx/proxy (Docker) envia X-Forwarded-For — necessário para req.ip e express-rate-limit
+  if (!config.server.isDev) {
+    app.set('trust proxy', 1);
+  }
+
   // ─── Security middleware ───────────────────────────────────────────────────
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cors({
