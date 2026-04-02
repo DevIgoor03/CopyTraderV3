@@ -69,6 +69,10 @@ services:
       ENCRYPTION_KEY:        ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
       FRONTEND_URL:          ${FRONTEND_URL:-http://localhost}
       BULLEX_PLATFORM_ID:    ${BULLEX_PLATFORM_ID:-580}
+      # Primeiro utilizador ADMIN (só usado se ainda não existir nenhum ADMIN na BD)
+      INITIAL_ADMIN_EMAIL:    ${INITIAL_ADMIN_EMAIL:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+      INITIAL_ADMIN_NAME:     ${INITIAL_ADMIN_NAME:-Super Admin}
     networks:
       - internal
     healthcheck:
