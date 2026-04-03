@@ -60,7 +60,7 @@ export default function ConnectMasterModal({ onClose, onConnected, prefillEmail,
             ? 'bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-300'
             : 'bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 text-brand-700 dark:text-brand-400'}`}>
             {isReconnect
-              ? '⚠️ A sessão com a corretora expirou ou o servidor foi reiniciado. Insira sua senha para reconectar.'
+              ? '⚠️ A sessão com a corretora expirou ou a ligação foi interrompida. Insira a sua senha para reconectar.'
               : 'Conecte a conta Bullex que será usada como master para replicar as operações.'}
           </div>
 

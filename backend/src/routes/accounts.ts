@@ -49,7 +49,7 @@ router.post('/master/connect', validate(connectMasterSchema), async (req: AuthRe
     const msg = err.message?.toLowerCase() ?? '';
     let friendlyError = `Falha ao conectar: ${err.message}`;
     if (msg.includes('fetch failed') || msg.includes('econnrefused') || msg.includes('timeout') || msg.includes('enotfound')) {
-      friendlyError = 'Não foi possível alcançar o servidor da Bullex (api.trade.bull-ex.com). Verifique sua conexão com a internet ou tente novamente em alguns minutos.';
+      friendlyError = 'Não foi possível alcançar os servidores da corretora Bullex. Verifique a sua ligação à internet ou tente novamente dentro de alguns minutos.';
     } else if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid') || msg.includes('password') || msg.includes('credentials')) {
       friendlyError = 'Credenciais inválidas. Verifique seu email e senha da Bullex.';
     }

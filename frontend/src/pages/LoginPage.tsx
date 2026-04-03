@@ -63,7 +63,7 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-8 flex flex-col gap-2">
-            {['WebSocket em tempo real', 'Multi-contas isoladas', 'Stop Win / Stop Loss automático', 'Portal self-service para seguidores'].map((f) => (
+            {['Atualização em tempo real', 'Contas de seguidores isoladas', 'Stop Win / Stop Loss automático', 'Portal para os seus seguidores'].map((f) => (
               <div key={f} className="flex items-center gap-2.5 text-sm text-white/80">
                 <ChevronRight className="w-4 h-4 text-white/50" />
                 {f}
@@ -73,7 +73,7 @@ export default function LoginPage() {
         </div>
 
         <p className="relative text-white/40 text-xs">
-          Plataforma Bull-ex — Platform ID 580
+          Integração com a corretora Bull-ex
         </p>
       </div>
 
