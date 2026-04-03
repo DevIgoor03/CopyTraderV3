@@ -4,10 +4,12 @@ import {
   TrendingUp, TrendingDown, LogOut, Settings, BarChart2, Eye, EyeOff,
   Moon, Sun, CheckCircle, XCircle, Clock, Power, Search,
   Wallet, Target, ShieldAlert, Copy, Zap, Activity, DollarSign,
-  LayoutDashboard, History, RotateCcw, Filter, Users, HelpCircle, ChevronLeft,
+  LayoutDashboard, History, RotateCcw, Filter, Users, HelpCircle, ChevronLeft, ArrowRight,
 } from 'lucide-react';
 import { portalApi, portalTokenStore } from '../services/portalApi';
 import { useTheme } from '../hooks/useTheme';
+import { MARKETPLACE_TRADERS_ENABLED } from '../config/features';
+import { InviteBullAuthShell } from '../components/login/InviteBullAuthShell';
 import toast from 'react-hot-toast';
 
 type Page = 'overview' | 'history' | 'settings';
@@ -78,6 +80,19 @@ function todayStr() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+const PORTAL_LOGIN_TICKER = [
+  'Copy trading em tempo real',
+  'Replicação automática para seguidores',
+  'Stop win e stop loss',
+  'Portal dedicado aos seguidores',
+  'Integração com a Bull-ex',
+  'Credenciais encriptadas',
+];
+
+const portalLoginInputClass =
+  'login-auth-shell w-full h-12 rounded-xl border border-neutral-200 bg-white px-3.5 text-sm text-neutral-900 ' +
+  'placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[oklch(0.62_0.20_152)]/35 focus:border-[oklch(0.62_0.20_152)] transition-colors';
+
 export default function FollowerPortalPage() {
   const { masterId } = useParams<{ masterId?: string }>();
   const { isDark, toggle } = useTheme();
@@ -102,6 +117,10 @@ export default function FollowerPortalPage() {
   const [filterTo,      setFilterTo]      = useState('');
   const [filterSearch,  setFilterSearch]  = useState('');
   const [showFilters,   setShowFilters]   = useState(false);
+
+  const [masterInfo, setMasterInfo] = useState<{ masterName: string } | null>(null);
+  const [masterInfoLoading, setMasterInfoLoading] = useState(false);
+  const [masterInfoError, setMasterInfoError] = useState(false);
 
   // Settings form
   const [sMode,    setSMode]    = useState('fixed');
@@ -139,6 +158,33 @@ export default function FollowerPortalPage() {
   useEffect(() => {
     if (masterId) setResolvedMasterId(masterId);
   }, [masterId]);
+
+  const routeKeyForPublic = (masterId ?? resolvedMasterId).trim();
+
+  useEffect(() => {
+    if (!routeKeyForPublic || routeKeyForPublic.length < 3) {
+      setMasterInfo(null);
+      setMasterInfoError(false);
+      setMasterInfoLoading(false);
+      return;
+    }
+    const delay = masterId ? 0 : 500;
+    const t = window.setTimeout(() => {
+      setMasterInfoLoading(true);
+      setMasterInfoError(false);
+      portalApi
+        .masterPublic(routeKeyForPublic)
+        .then((d: { masterName?: string }) => {
+          setMasterInfo({ masterName: String(d.masterName ?? 'Operador') });
+        })
+        .catch(() => {
+          setMasterInfo(null);
+          setMasterInfoError(true);
+        })
+        .finally(() => setMasterInfoLoading(false));
+    }, delay);
+    return () => window.clearTimeout(t);
+  }, [masterId, resolvedMasterId]);
 
   useEffect(() => {
     const token = portalTokenStore.get();
@@ -195,7 +241,12 @@ export default function FollowerPortalPage() {
       const s = err?.response?.status;
       if (s === 429) toast.error('Muitas tentativas. Aguarde 1 minuto.');
       else if (s === 404) toast.error('Copytrader não encontrado. Verifique o link.');
-      else toast.error(err?.response?.data?.error ?? 'Falha ao autenticar');
+      else if (s === 403) {
+        toast.error(
+          err?.response?.data?.error
+          ?? 'Acesso não autorizado. Envie seu email Bullex ao suporte após a compra.',
+        );
+      } else toast.error(err?.response?.data?.error ?? 'Falha ao autenticar');
     } finally {
       setLogging(false);
     }
@@ -261,84 +312,203 @@ export default function FollowerPortalPage() {
     return trades.filter((t) => new Date(t.openedAt).getTime() >= sessionStartedAtMs);
   }, [trades, follower?.copySettings?.isActive, sessionStartedAtMs]);
 
-  // ─── Login Screen ─────────────────────────────────────────────────────────────
+  // ─── Login Screen (mesmo shell visual do login do operador master) ────────────
 
   if (!isLoggedIn || !follower) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-4 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-60 -right-60 w-[600px] h-[600px] rounded-full opacity-[0.04]"
-            style={{ background: 'radial-gradient(circle, #84cc16 0%, transparent 70%)' }} />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-[0.03]"
-            style={{ background: 'radial-gradient(circle, #84cc16 0%, transparent 70%)' }} />
+    const loginGrid = (
+      <div className="w-full max-w-7xl mx-auto grid lg:grid-cols-[1fr_400px] gap-12 lg:gap-20 items-center">
+        <div className="animate-invite-float-up" style={{ animationDelay: '0.1s' }}>
+          {MARKETPLACE_TRADERS_ENABLED ? (
+            <button
+              type="button"
+              onClick={() => navigate('/traders')}
+              className="mb-6 flex items-center gap-1.5 text-xs font-semibold text-[oklch(0.52_0.018_152)] hover:text-[oklch(0.94_0.006_155)] transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Escolher outro trader
+            </button>
+          ) : null}
+
+          <div className="inline-flex items-center gap-2 mb-8">
+            <div className="w-1.5 h-1.5 rounded-full bg-[oklch(0.62_0.20_152)] animate-pulse" />
+            <span className="text-xs font-semibold text-[oklch(0.52_0.018_152)] tracking-[0.15em] uppercase">
+              Portal do seguidor · Bull-ex
+            </span>
+          </div>
+
+          <h1 className="font-display font-bold leading-[0.92] tracking-[-0.04em] mb-8">
+            <span className="block text-[clamp(2.5rem,8vw,7rem)] text-[oklch(0.94_0.006_155)]">Copie.</span>
+            <span
+              className="block text-[clamp(2.5rem,8vw,7rem)]"
+              style={{
+                background: 'linear-gradient(135deg, oklch(0.72 0.22 152), oklch(0.65 0.20 175))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Sincroniza.
+            </span>
+            <span className="block text-[clamp(2.5rem,8vw,7rem)] text-[oklch(0.94_0.006_155)]/30">Lucre.</span>
+          </h1>
+
+          <div className="flex items-start gap-6">
+            <div
+              className="w-px h-16 shrink-0 mt-1"
+              style={{
+                background: 'linear-gradient(to bottom, oklch(0.62 0.20 152 / 0.6), transparent)',
+              }}
+            />
+            <div className="text-base text-[oklch(0.52_0.018_152)] leading-relaxed max-w-sm space-y-2">
+              <p>
+                As operações do operador são replicadas na sua conta Bull-ex em tempo real, com stop win, stop loss e
+                definições que ajusta neste portal.
+              </p>
+              {masterInfoLoading && <p className="text-sm text-[oklch(0.52_0.018_152)]">A identificar operador…</p>}
+              {!masterInfoLoading && masterInfo && (
+                <p className="text-[oklch(0.94_0.006_155)] font-semibold">
+                  Operador:{' '}
+                  <span className="text-[oklch(0.62_0.20_152)]">{masterInfo.masterName}</span>
+                </p>
+              )}
+              {!masterInfoLoading && masterInfoError && routeKeyForPublic.length >= 3 && (
+                <p className="text-sm text-red-400">Link inválido ou operador não encontrado.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-8 sm:gap-10 mt-10">
+            {[
+              { value: '24/7', label: 'Sincronização' },
+              { value: '100%', label: 'Replicação' },
+              { value: 'Bull-ex', label: 'Corretora' },
+            ].map(({ value, label }, i) => (
+              <div key={label} className="animate-invite-float-up" style={{ animationDelay: `${0.2 + i * 0.08}s` }}>
+                <p className="font-display text-2xl font-bold tracking-tight text-[oklch(0.94_0.006_155)]">{value}</p>
+                <p className="text-xs text-[oklch(0.52_0.018_152)] mt-0.5">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <button onClick={toggle} className="fixed top-4 right-4 btn-icon z-10">
-          {isDark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4" />}
-        </button>
+        <div className="animate-invite-float-up" style={{ animationDelay: '0.25s' }}>
+          <div className="relative">
+            <div
+              className="absolute inset-0 rounded-3xl blur-2xl -z-10 scale-95"
+              style={{ background: 'oklch(0.38 0.18 152 / 0.12)' }}
+            />
+            <div className="relative bg-[oklch(0.095_0.01_155)]/70 backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-8 overflow-hidden">
+              <div
+                className="absolute inset-x-8 top-0 h-px rounded-full pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, oklch(0.62 0.20 152 / 0.6), transparent)',
+                }}
+              />
 
-        <button
-          onClick={() => navigate('/traders')}
-          className="fixed top-4 left-4 z-10 flex items-center gap-1.5 text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text-1)] transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Escolher outro trader
-        </button>
-
-        <div className="w-full max-w-[400px] relative">
-          <div className="text-center mb-8">
-            <div className="relative w-14 h-14 mx-auto mb-5">
-              <div className="w-14 h-14 rounded-2xl bg-brand-gradient flex items-center justify-center shadow-lg">
-                <TrendingUp className="w-7 h-7 text-white" strokeWidth={2.5} />
+              <div className="mb-7 relative">
+                <p className="text-xs text-[oklch(0.52_0.018_152)] tracking-[0.1em] uppercase font-semibold mb-2">
+                  Acesse o seu portal
+                </p>
+                <h2 className="font-display text-xl font-bold tracking-tight text-[oklch(0.94_0.006_155)]">
+                  Bem-vindo de volta
+                </h2>
+                <p className="text-xs text-[oklch(0.52_0.018_152)] mt-2 leading-relaxed">
+                  {masterInfo && !masterInfoLoading
+                    ? `Entre com a conta Bull-ex associada ao copy do operador ${masterInfo.masterName}.`
+                    : 'Entre com o email e a senha da sua conta Bull-ex de seguidor.'}
+                </p>
               </div>
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-[var(--bg)] flex items-center justify-center">
-                <Zap className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-              </span>
-            </div>
-            <h1 className="text-2xl font-extrabold text-[var(--text-1)] tracking-tight">Portal do Seguidor</h1>
-            <p className="text-sm text-[var(--text-2)] mt-1.5">Acesse com suas credenciais Bullex</p>
-          </div>
 
-          {!masterId && (
-            <div className="mb-4">
-              <label className="label uppercase tracking-wider text-[10px]">ID do Copytrader</label>
-              <input className="field" placeholder="Cole o ID aqui..."
-                value={resolvedMasterId} onChange={(e) => setResolvedMasterId(e.target.value)} />
-            </div>
-          )}
-
-          <div className="card p-6">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="label">Email Bullex</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com" required className="field" />
-              </div>
-              <div>
-                <label className="label">Senha Bullex</label>
-                <div className="relative">
-                  <input type={showPw ? 'text' : 'password'} value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••" required className="field pr-10" />
-                  <button type="button" onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors">
-                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+              <form onSubmit={handleLogin} className="space-y-4 relative">
+                {!masterId && (
+                  <div>
+                    <label className="block text-xs font-semibold text-[oklch(0.52_0.018_152)] mb-2 tracking-wide">
+                      Identificador do portal
+                    </label>
+                    <input
+                      className={portalLoginInputClass}
+                      placeholder="Slug ou ID do operador"
+                      value={resolvedMasterId}
+                      onChange={(e) => setResolvedMasterId(e.target.value)}
+                      disabled={logging}
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-semibold text-[oklch(0.52_0.018_152)] mb-2 tracking-wide">
+                    E-mail Bull-ex
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    required
+                    disabled={logging}
+                    className={portalLoginInputClass}
+                  />
                 </div>
-              </div>
-              <button type="submit" disabled={logging} className="btn-brand w-full mt-1">
-                {logging
-                  ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <><Zap className="w-4 h-4" /> Entrar no Portal</>}
-              </button>
-            </form>
-          </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[oklch(0.52_0.018_152)] mb-2 tracking-wide">
+                    Senha Bull-ex
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPw ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      disabled={logging}
+                      className={`${portalLoginInputClass} pr-11`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(!showPw)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 transition-colors"
+                      aria-label={showPw ? 'Ocultar senha' : 'Mostrar senha'}
+                    >
+                      {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
 
-          <p className="text-center text-[11px] text-[var(--text-3)] mt-4">
-            🔒 Credenciais criptografadas e usadas apenas para autenticar na Bullex
-          </p>
+                <button
+                  type="submit"
+                  disabled={logging}
+                  className="w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white
+                             bg-[oklch(0.62_0.20_152)] hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ boxShadow: '0 8px 32px oklch(0.62 0.20 152 / 0.35)' }}
+                >
+                  {logging ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    <>
+                      Entrar no portal
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-6 pt-6 border-t border-white/[0.06] relative">
+                <p className="text-xs text-[oklch(0.52_0.018_152)] text-center leading-relaxed">
+                  Credenciais encriptadas e usadas apenas para autenticar na Bull-ex.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    );
+
+    return (
+      <InviteBullAuthShell logoLabel="CopyTrader" tickerItems={PORTAL_LOGIN_TICKER}>
+        {loginGrid}
+      </InviteBullAuthShell>
     );
   }
 

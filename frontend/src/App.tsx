@@ -7,6 +7,7 @@ import DashboardPage          from './pages/DashboardPage.js';
 import SuperAdminDashboardPage from './pages/SuperAdminDashboardPage.js';
 import FollowerPortalPage     from './pages/FollowerPortalPage.js';
 import TradersMarketplacePage from './pages/TradersMarketplacePage.js';
+import { MARKETPLACE_TRADERS_ENABLED } from './config/features.js';
 
 function MasterProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = tokenStore.getAccess();
@@ -40,9 +41,18 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/dashboard"  element={<MasterProtectedRoute><DashboardPage /></MasterProtectedRoute>} />
         <Route path="/admin"       element={<AdminProtectedRoute><SuperAdminDashboardPage /></AdminProtectedRoute>} />
-        <Route path="/traders"          element={<TradersMarketplacePage />} />
+        <Route
+          path="/traders"
+          element={
+            MARKETPLACE_TRADERS_ENABLED ? (
+              <TradersMarketplacePage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
         <Route path="/portal/:masterId" element={<FollowerPortalPage />} />
-        <Route path="/portal"           element={<Navigate to="/traders" replace />} />
+        <Route path="/portal" element={<Navigate to="/login" replace />} />
         <Route path="/"            element={<RootRedirect />} />
         <Route path="*"            element={<Navigate to="/" replace />} />
       </Routes>

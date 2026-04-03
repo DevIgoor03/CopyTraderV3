@@ -19,6 +19,10 @@ portalAxios.interceptors.request.use((cfg) => {
 });
 
 export const portalApi = {
+  /** Dados públicos para a tela de login do seguidor (nome do operador). */
+  masterPublic: (routeKey: string) =>
+    portalAxios.get(`/api/portal/${encodeURIComponent(routeKey)}/public`).then((r) => r.data),
+
   login: (masterId: string, email: string, password: string) =>
     portalAxios.post(`/api/portal/${masterId}/login`, { email, password }).then((r) => r.data),
 

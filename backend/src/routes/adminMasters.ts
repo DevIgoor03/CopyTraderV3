@@ -36,6 +36,10 @@ const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, 'Senha: mínimo 8 caracteres'),
 });
 
+const portalAllowlistEmailSchema = z.object({
+  bullexEmail: z.string().email('Email Bullex inválido'),
+});
+
 function planPayload(plan: CopyPlan, followerCount: number) {
   const spec = planService.spec(plan);
   const max    = spec.maxFollowers;
@@ -217,6 +221,88 @@ router.patch('/masters/:userId/password', validate(resetPasswordSchema), async (
     });
     await prisma.refreshSession.deleteMany({ where: { userId: target.id } });
     logger.info({ targetUserId: target.id, byAdmin: req.user!.userId }, 'Master password reset by admin');
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+async function masterUserWithAccount(userId: string) {
+  return prisma.user.findUnique({
+    where:  { id: userId },
+    select: { id: true, role: true, masterAccount: { select: { id: true } } },
+  });
+}
+
+// GET /api/admin/masters/:userId/portal-allowlist — emails Bullex autorizados no portal deste master
+router.get('/masters/:userId/portal-allowlist', async (req: AuthRequest, res: Response) => {
+  try {
+    const target = await masterUserWithAccount(req.params.userId);
+    if (!target || target.role !== 'MASTER' || !target.masterAccount) {
+      res.status(404).json({ error: 'Master ou conta de trading não encontrada' });
+      return;
+    }
+    const entries = await prisma.followerPortalAllowlist.findMany({
+      where:   { masterId: target.masterAccount.id },
+      orderBy: { createdAt: 'desc' },
+      select:  { id: true, bullexEmail: true, createdAt: true, createdByUserId: true },
+    });
+    res.json({ entries });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/masters/:userId/portal-allowlist
+router.post('/masters/:userId/portal-allowlist', validate(portalAllowlistEmailSchema), async (req: AuthRequest, res: Response) => {
+  try {
+    const target = await masterUserWithAccount(req.params.userId);
+    if (!target || target.role !== 'MASTER' || !target.masterAccount) {
+      res.status(404).json({ error: 'Master ou conta de trading não encontrada' });
+      return;
+    }
+    const bullexEmail = String(req.body.bullexEmail ?? '').trim().toLowerCase();
+    const row = await prisma.followerPortalAllowlist.create({
+      data: {
+        masterId:         target.masterAccount.id,
+        bullexEmail,
+        createdByUserId: req.user!.userId,
+      },
+      select: { id: true, bullexEmail: true, createdAt: true },
+    });
+    logger.info(
+      { masterAccountId: target.masterAccount.id, bullexEmail, byAdmin: req.user!.userId },
+      'Portal allowlist entry added'
+    );
+    res.status(201).json({ entry: row });
+  } catch (err: any) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      res.status(400).json({ error: 'Este email já está na lista deste operador' });
+      return;
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/admin/masters/:userId/portal-allowlist/:entryId
+router.delete('/masters/:userId/portal-allowlist/:entryId', async (req: AuthRequest, res: Response) => {
+  try {
+    const target = await masterUserWithAccount(req.params.userId);
+    if (!target || target.role !== 'MASTER' || !target.masterAccount) {
+      res.status(404).json({ error: 'Master ou conta de trading não encontrada' });
+      return;
+    }
+    const del = await prisma.followerPortalAllowlist.deleteMany({
+      where: { id: req.params.entryId, masterId: target.masterAccount.id },
+    });
+    if (del.count === 0) {
+      res.status(404).json({ error: 'Entrada não encontrada' });
+      return;
+    }
+    logger.info(
+      { entryId: req.params.entryId, masterAccountId: target.masterAccount.id, byAdmin: req.user!.userId },
+      'Portal allowlist entry removed'
+    );
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

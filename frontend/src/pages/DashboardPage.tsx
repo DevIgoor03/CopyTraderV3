@@ -410,7 +410,7 @@ function FollowersPage({ followers, onAdd, onRemove, onUpdate, masterId, portalP
     ? `${origin}${portalPath}`
     : masterId
       ? `${origin}/portal/${masterId}`
-      : `${origin}/portal`;
+      : `${origin}/login`;
 
   const copyPortalLink = () => {
     navigator.clipboard.writeText(portalUrl);

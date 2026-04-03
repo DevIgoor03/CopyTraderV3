@@ -62,12 +62,27 @@ export async function requirePortalToken(req: PortalRequest, res: Response, next
   try {
     const session = await prisma.portalSession.findUnique({
       where:   { token },
-      include: { follower: { select: { id: true, masterId: true } } },
+      include: { follower: { select: { id: true, masterId: true, bullexEmail: true } } },
     });
 
     if (!session || session.expiresAt < new Date()) {
       if (session) await prisma.portalSession.delete({ where: { id: session.id } });
       res.status(401).json({ error: 'Sessão expirada' });
+      return;
+    }
+
+    const portalEmail = session.follower.bullexEmail.trim().toLowerCase();
+    const stillAllowed = await prisma.followerPortalAllowlist.findUnique({
+      where: {
+        masterId_bullexEmail: { masterId: session.follower.masterId, bullexEmail: portalEmail },
+      },
+    });
+    if (!stillAllowed) {
+      await prisma.portalSession.deleteMany({ where: { token } });
+      res.status(403).json({
+        error: 'Acesso ao portal revogado. Contacte o suporte.',
+        code: 'PORTAL_ALLOWLIST_REVOKED',
+      });
       return;
     }
 

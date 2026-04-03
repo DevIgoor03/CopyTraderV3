@@ -65,6 +65,15 @@
   }
 }
 
+/* Login / admin login: autofill não pode herdar texto claro sobre fundo branco */
+.login-auth-shell input:-webkit-autofill,
+.login-auth-shell input:-webkit-autofill:hover,
+.login-auth-shell input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #171717 !important;
+  caret-color: #171717;
+}
+
 /* ─── Components ──────────────────────────────────────────────── */
 @layer components {
 
@@ -172,4 +181,26 @@
   .bg-surface  { background: var(--surface);   }
   .bg-surface2 { background: var(--surface-2); }
   .border-c  { border-color: var(--border); }
+
+  .login-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: login-marquee-scroll 32s linear infinite;
+  }
+}
+
+/* Keyframes globais (fora de @layer — mais fiável que só Tailwind). */
+@keyframes login-marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-marquee-track {
+    animation: none;
+  }
 }

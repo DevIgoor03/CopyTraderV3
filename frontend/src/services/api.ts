@@ -122,6 +122,15 @@ export const adminApi = {
 
   resetMasterPassword: (userId: string, newPassword: string) =>
     api.patch(`/api/admin/masters/${userId}/password`, { newPassword }).then((r) => r.data),
+
+  getPortalAllowlist: (userId: string) =>
+    api.get(`/api/admin/masters/${userId}/portal-allowlist`).then((r) => r.data),
+
+  addPortalAllowlistEmail: (userId: string, bullexEmail: string) =>
+    api.post(`/api/admin/masters/${userId}/portal-allowlist`, { bullexEmail }).then((r) => r.data),
+
+  removePortalAllowlistEntry: (userId: string, entryId: string) =>
+    api.delete(`/api/admin/masters/${userId}/portal-allowlist/${entryId}`).then((r) => r.data),
 };
 
 // ─── Accounts API ─────────────────────────────────────────────────────────────

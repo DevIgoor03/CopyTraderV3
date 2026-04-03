@@ -11,6 +11,45 @@ import { resolvePortalRouteKey } from '../utils/portalSlug.js';
 
 const router = Router();
 
+/** Lista pública /api/portal/traders — desligada sem apagar o handler. */
+const PORTAL_TRADERS_MARKETPLACE_ENABLED = false;
+
+// GET /api/portal/:routeKey/public — nome do master para a tela de login do seguidor (sem auth)
+router.get('/:routeKey/public', portalLimiter, async (req: Request, res: Response) => {
+  const routeKey = String(req.params.routeKey ?? '').trim();
+  if (!routeKey) {
+    res.status(400).json({ error: 'Parâmetro inválido' });
+    return;
+  }
+  try {
+    const masterInternalId = await resolvePortalRouteKey(routeKey);
+    if (!masterInternalId) {
+      res.status(404).json({ error: 'Copytrader não encontrado' });
+      return;
+    }
+    const user = await prisma.user.findFirst({
+      where: { role: 'MASTER', masterAccount: { id: masterInternalId } },
+      select: {
+        name: true,
+        portalSlug: true,
+        masterAccount: { select: { name: true } },
+      },
+    });
+    if (!user?.masterAccount) {
+      res.status(404).json({ error: 'Copytrader não encontrado' });
+      return;
+    }
+    const masterName =
+      (user.masterAccount.name && user.masterAccount.name.trim()) ||
+      (user.name && user.name.trim()) ||
+      'Operador';
+    res.json({ masterName, portalSlug: user.portalSlug ?? null });
+  } catch (err: any) {
+    logger.warn({ err: err.message }, 'portal public info failed');
+    res.status(500).json({ error: 'Erro ao carregar dados' });
+  }
+});
+
 // POST /api/portal/:masterId/login
 const loginSchema = z.object({
   email:    z.string().email('Email inválido'),
@@ -25,6 +64,18 @@ router.post('/:masterId/login', portalLimiter, validate(loginSchema), async (req
   try {
     const masterInternalId = await resolvePortalRouteKey(routeKey);
     if (!masterInternalId) { res.status(404).json({ error: 'Copytrader não encontrado' }); return; }
+
+    const allowlisted = await prisma.followerPortalAllowlist.findUnique({
+      where: { masterId_bullexEmail: { masterId: masterInternalId, bullexEmail: email } },
+    });
+    if (!allowlisted) {
+      res.status(403).json({
+        error:
+          'Este email não está autorizado para este copytrade. Após a compra, envie seu email Bullex ao suporte para liberação.',
+        code: 'PORTAL_NOT_ALLOWLISTED',
+      });
+      return;
+    }
 
     let follower;
     try {
@@ -244,8 +295,12 @@ router.post('/logout', requirePortalToken as any, async (req: PortalRequest, res
   res.json({ success: true });
 });
 
-// GET /api/portal/traders — público, sem autenticação (marketplace de traders)
+// GET /api/portal/traders — público (marketplace; pode ficar desativado)
 router.get('/traders', async (_req: Request, res: Response) => {
+  if (!PORTAL_TRADERS_MARKETPLACE_ENABLED) {
+    res.json({ traders: [], marketplaceDisabled: true });
+    return;
+  }
   try {
     const users = await prisma.user.findMany({
       where: { role: 'MASTER', masterAccount: { isNot: null } },

@@ -1,3 +1,7 @@
+/**
+ * Marketplace público de traders. Rota /traders pode estar desligada em `src/config/features.ts`
+ * (`MARKETPLACE_TRADERS_ENABLED`); o ficheiro mantém-se para reativar sem reescrever.
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

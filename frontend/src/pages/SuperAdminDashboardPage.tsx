@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, LogOut, Users, Plus, Trash2, KeyRound, RefreshCw, Mail, User, Moon, Sun, BarChart3, Link2,
+  Shield, LogOut, Users, Plus, Trash2, KeyRound, RefreshCw, Mail, User, Moon, Sun, BarChart3, Link2, UserCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminApi, authApi, tokenStore, type CopyPlanTier } from '../services/api';
@@ -37,6 +37,13 @@ interface MasterPlanRow {
   optimizedCopy: boolean;
   priorityServer: boolean;
   vipSupport: boolean;
+}
+
+interface PortalAllowlistEntry {
+  id: string;
+  bullexEmail: string;
+  createdAt: string;
+  createdByUserId: string | null;
 }
 
 interface MasterRow {
@@ -83,6 +90,13 @@ export default function SuperAdminDashboardPage() {
   const [newPw, setNewPw] = useState('');
   const [resetBusy, setResetBusy] = useState(false);
 
+  const [allowlistUserId, setAllowlistUserId] = useState<string | null>(null);
+  const [allowlistMasterName, setAllowlistMasterName] = useState('');
+  const [allowlistEntries, setAllowlistEntries] = useState<PortalAllowlistEntry[]>([]);
+  const [allowlistLoading, setAllowlistLoading] = useState(false);
+  const [allowlistEmail, setAllowlistEmail] = useState('');
+  const [allowlistBusy, setAllowlistBusy] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -107,7 +121,61 @@ export default function SuperAdminDashboardPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!allowlistUserId) return;
+    setAllowlistLoading(true);
+    adminApi.getPortalAllowlist(allowlistUserId)
+      .then((d: { entries?: PortalAllowlistEntry[] }) => setAllowlistEntries(d.entries ?? []))
+      .catch((err: any) => {
+        toast.error(err.response?.data?.error ?? 'Erro ao carregar emails liberados');
+        setAllowlistUserId(null);
+      })
+      .finally(() => setAllowlistLoading(false));
+  }, [allowlistUserId]);
+
   const user = tokenStore.getUser();
+
+  const openAllowlist = (m: MasterRow) => {
+    if (!m.masterAccount) {
+      toast.error('Este operador ainda não tem conta Bullex no painel — o portal não está ativo.');
+      return;
+    }
+    setAllowlistMasterName(m.name);
+    setAllowlistEmail('');
+    setAllowlistEntries([]);
+    setAllowlistUserId(m.id);
+  };
+
+  const handleAddAllowlistEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!allowlistUserId || !allowlistEmail.trim()) return;
+    setAllowlistBusy(true);
+    try {
+      await adminApi.addPortalAllowlistEmail(allowlistUserId, allowlistEmail.trim());
+      toast.success('Email adicionado à lista do portal');
+      setAllowlistEmail('');
+      const d = await adminApi.getPortalAllowlist(allowlistUserId);
+      setAllowlistEntries(d.entries ?? []);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error ?? 'Falha ao adicionar');
+    } finally {
+      setAllowlistBusy(false);
+    }
+  };
+
+  const handleRemoveAllowlistEntry = async (entryId: string) => {
+    if (!allowlistUserId) return;
+    setAllowlistBusy(true);
+    try {
+      await adminApi.removePortalAllowlistEntry(allowlistUserId, entryId);
+      toast.success('Removido da lista');
+      setAllowlistEntries((prev) => prev.filter((x) => x.id !== entryId));
+    } catch (err: any) {
+      toast.error(err.response?.data?.error ?? 'Falha ao remover');
+    } finally {
+      setAllowlistBusy(false);
+    }
+  };
 
   const handleLogout = () => {
     const refresh = tokenStore.getRefresh();
@@ -366,6 +434,14 @@ export default function SuperAdminDashboardPage() {
                         <div className="flex justify-end gap-1 flex-wrap">
                           <button
                             type="button"
+                            onClick={() => openAllowlist(m)}
+                            className="p-2 rounded-lg border border-[var(--border)] hover:border-emerald-500/40 text-[var(--text-2)]"
+                            title="Emails Bullex liberados no portal"
+                          >
+                            <UserCheck className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => { setResetUserId(m.id); setNewPw(''); }}
                             className="p-2 rounded-lg border border-[var(--border)] hover:border-violet-500/40 text-[var(--text-2)]"
                             title="Redefinir senha do painel"
@@ -426,6 +502,71 @@ export default function SuperAdminDashboardPage() {
                 <button type="submit" disabled={createBusy} className="flex-1 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold disabled:opacity-60">Criar</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {allowlistUserId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-[var(--text-1)] flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-emerald-500" /> Portal — emails liberados
+            </h3>
+            <p className="text-xs text-[var(--text-3)]">
+              Só quem estiver nesta lista consegue entrar no <span className="font-mono">/portal/…</span> deste operador com o email Bullex indicado.
+              <span className="block mt-1 font-medium text-[var(--text-2)]">{allowlistMasterName}</span>
+            </p>
+            <form onSubmit={handleAddAllowlistEmail} className="flex gap-2 flex-wrap items-end">
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-xs font-medium text-[var(--text-2)] mb-1">Email Bullex do seguidor</label>
+                <input
+                  type="email"
+                  className="field w-full text-sm"
+                  value={allowlistEmail}
+                  onChange={(e) => setAllowlistEmail(e.target.value)}
+                  placeholder="email@exemplo.com"
+                  disabled={allowlistBusy}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={allowlistBusy || !allowlistEmail.trim()}
+                className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-50"
+              >
+                Adicionar
+              </button>
+            </form>
+            <div className="border border-[var(--border)] rounded-xl overflow-hidden">
+              {allowlistLoading ? (
+                <p className="p-4 text-sm text-[var(--text-3)] text-center">Carregando…</p>
+              ) : allowlistEntries.length === 0 ? (
+                <p className="p-4 text-sm text-[var(--text-3)] text-center">Nenhum email liberado ainda.</p>
+              ) : (
+                <ul className="divide-y divide-[var(--border)] text-sm">
+                  {allowlistEntries.map((row) => (
+                    <li key={row.id} className="flex items-center justify-between gap-2 px-3 py-2.5">
+                      <span className="font-mono text-[var(--text-1)] truncate" title={row.bullexEmail}>{row.bullexEmail}</span>
+                      <button
+                        type="button"
+                        disabled={allowlistBusy}
+                        onClick={() => { void handleRemoveAllowlistEntry(row.id); }}
+                        className="flex-shrink-0 p-1.5 rounded-lg text-red-500 hover:bg-red-500/10"
+                        title="Remover"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => { setAllowlistUserId(null); setAllowlistEntries([]); }}
+              className="w-full py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-2)]"
+            >
+              Fechar
+            </button>
           </div>
         </div>
       )}

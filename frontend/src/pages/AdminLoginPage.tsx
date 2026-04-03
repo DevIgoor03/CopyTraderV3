@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, Moon, Sun, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Lock, Sparkles, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { authApi, tokenStore } from '../services/api';
-import { useTheme } from '../hooks/useTheme';
 import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
-  const { isDark, toggle } = useTheme();
-  const [email,    setEmail]    = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPw,   setShowPw]   = useState(false);
-  const [loading,  setLoading]  = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,75 +31,111 @@ export default function AdminLoginPage() {
     }
   };
 
+  const fieldClass =
+    'w-full h-11 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 ' +
+    'placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[oklch(0.62_0.20_152)]/40 focus:border-[oklch(0.62_0.20_152)] transition-colors';
+
   return (
-    <div className="min-h-screen flex bg-[var(--bg)]">
-      <div className="hidden lg:flex lg:w-[45%] bg-slate-900 relative overflow-hidden flex-col justify-between p-10 text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/40 to-slate-900" />
-        <div className="relative flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-lg font-bold tracking-tight">CopyTrader — Super Admin</span>
-        </div>
-        <div className="relative">
-          <h1 className="text-3xl font-bold leading-tight mb-3">Gestão de contas master</h1>
-          <p className="text-white/65 text-sm max-w-xs leading-relaxed">
-            Crie e gerencie os operadores que acessam o painel de copy trading. O cadastro público está desativado.
-          </p>
-        </div>
-        <p className="relative text-white/35 text-xs">Acesso restrito</p>
+    <div className="login-auth-shell dark min-h-screen bg-[oklch(0.065_0.01_155)] text-[oklch(0.94_0.006_155)] flex items-center justify-center px-4 antialiased font-sans">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-[oklch(0.62_0.20_152)]/6 blur-[100px]" />
+        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-[oklch(0.62_0.20_152)]/4 blur-[100px]" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 relative">
-        <button type="button" onClick={toggle} className="absolute top-5 right-5 w-9 h-9 rounded-xl btn-icon" title="Tema">
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
-
-        <div className="w-full max-w-sm">
-          <div className="flex lg:hidden items-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-base font-bold text-[var(--text-1)]">Super Admin</span>
+      <div className="relative w-full max-w-sm z-10">
+        <div className="flex flex-col items-center mb-8">
+          <div
+            className="w-12 h-12 rounded-2xl bg-[oklch(0.62_0.20_152)] flex items-center justify-center mb-4 shadow-lg"
+            style={{ boxShadow: '0 10px 40px oklch(0.62 0.20 152 / 0.3)' }}
+          >
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
+          <h1 className="font-display text-2xl font-bold tracking-tight">CopyTrader</h1>
+          <p className="text-sm text-[oklch(0.52_0.018_152)] mt-1">Super administrador da plataforma</p>
+        </div>
 
-          <h2 className="text-2xl font-bold text-[var(--text-1)] mb-1">Entrar</h2>
-          <p className="text-sm text-[var(--text-3)] mb-8">Credenciais do administrador da plataforma</p>
+        <div className="relative bg-[oklch(0.095_0.01_155)]/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-7 shadow-2xl shadow-black/30">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[oklch(0.62_0.20_152)]/40 to-transparent rounded-full" />
+
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-9 h-9 rounded-xl bg-[oklch(0.62_0.20_152)]/10 border border-[oklch(0.62_0.20_152)]/20 flex items-center justify-center">
+              <Lock className="w-4 h-4 text-[oklch(0.62_0.20_152)]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Acesso restrito</p>
+              <p className="text-xs text-[oklch(0.52_0.018_152)]">
+                Gerir operadores master, portais e limites do CopyTrader
+              </p>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[var(--text-2)] mb-1.5">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="field w-full" placeholder="admin@empresa.com" />
+              <label className="block text-sm font-medium mb-2 text-[oklch(0.52_0.018_152)]">E-mail</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+                autoFocus
+                placeholder="admin@empresa.com"
+                className={fieldClass}
+              />
             </div>
             <div>
-              <label className="block text-xs font-medium text-[var(--text-2)] mb-1.5">Senha</label>
+              <label className="block text-sm font-medium mb-2 text-[oklch(0.52_0.018_152)]">Senha</label>
               <div className="relative">
                 <input
                   type={showPw ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="field w-full pr-10"
+                  disabled={loading}
                   placeholder="••••••••"
+                  className={`${fieldClass} pr-10`}
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)]">
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPw ? 'Ocultar senha' : 'Mostrar senha'}
+                >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl px-4 py-3 transition-all disabled:opacity-60"
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white
+                         bg-[oklch(0.62_0.20_152)] hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ boxShadow: '0 8px 32px oklch(0.62 0.20 152 / 0.35)' }}
             >
-              {loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>Entrar</span><ArrowRight className="w-4 h-4" /></>}
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Entrar no Painel
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
-
-          <p className="text-center text-sm text-[var(--text-3)] mt-8">
-            <Link to="/login" className="text-violet-600 dark:text-violet-400 font-semibold hover:underline">Painel master (operador)</Link>
-          </p>
         </div>
+
+        <p className="text-center text-xs text-[oklch(0.52_0.018_152)] mt-6">
+          ←{' '}
+          <Link to="/login" className="hover:text-[oklch(0.94_0.006_155)] transition-colors underline underline-offset-4">
+            Voltar ao login do operador
+          </Link>
+        </p>
       </div>
     </div>
   );

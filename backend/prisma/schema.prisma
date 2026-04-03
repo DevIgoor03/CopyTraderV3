@@ -25,6 +25,7 @@ model User {
 
   masterAccount   MasterAccount?
   refreshSessions RefreshSession[]
+  portalAllowlistEntriesCreated FollowerPortalAllowlist[] @relation("PortalAllowlistCreatedBy")
 
   @@map("users")
 }
@@ -60,8 +61,26 @@ model MasterAccount {
   user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   followers FollowerAccount[]
   trades    Trade[]
+  /// Emails Bull-ex autorizados pelo super admin a aceder ao /portal deste master.
+  portalAllowlist FollowerPortalAllowlist[]
 
   @@map("master_accounts")
+}
+
+/// Liberação explícita (super admin) para o seguidor entrar no portal com aquele email Bull-ex neste master.
+model FollowerPortalAllowlist {
+  id               String   @id @default(cuid())
+  masterId         String   @map("master_id")
+  bullexEmail      String   @map("bullex_email")
+  createdAt        DateTime @default(now()) @map("created_at")
+  createdByUserId String? @map("created_by_user_id")
+
+  master    MasterAccount @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  createdBy User?         @relation("PortalAllowlistCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([masterId, bullexEmail])
+  @@index([masterId])
+  @@map("follower_portal_allowlist")
 }
 
 // ─── Follower Accounts ────────────────────────────────────────────────────────
