@@ -33,11 +33,11 @@ export default function MasterCard({ account, copyRunning, onDisconnect, onCopyT
       if (copyRunning) {
         await accountsApi.stopCopy();
         onCopyToggle(false);
-        toast('CopyTrader pausado', { icon: '⏸' });
+        toast('Cópia pausada', { icon: '⏸' });
       } else {
         await accountsApi.startCopy();
         onCopyToggle(true);
-        toast.success('CopyTrader iniciado!');
+        toast.success('CopyFy em execução — cópia iniciada!');
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Erro ao controlar copy');
@@ -135,7 +135,7 @@ export default function MasterCard({ account, copyRunning, onDisconnect, onCopyT
           }`}>
           {toggling ? <Loader2 className="w-4 h-4 animate-spin" />
                     : copyRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          {copyRunning ? 'Pausar CopyTrader' : 'Iniciar CopyTrader'}
+          {copyRunning ? 'Pausar cópia' : 'Iniciar cópia'}
         </button>
 
         {copyRunning && (

@@ -211,7 +211,7 @@ export default function EditFollowerModal({ follower, onClose, onSaved }: Props)
             {(cfg.stopWin || cfg.stopLoss) && (
               <p className="text-xs text-c3 mt-2 flex items-center gap-1.5">
                 <span className="w-1 h-1 rounded-full bg-brand-400" />
-                O copytrader pausa automaticamente ao atingir os limites
+                O CopyFy pausa a cópia automaticamente ao atingir os limites
               </p>
             )}
           </div>

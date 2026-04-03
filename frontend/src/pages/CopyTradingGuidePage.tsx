@@ -53,7 +53,7 @@ export default function CopyTradingGuidePage() {
             >
               copy trading
             </span>{' '}
-            e como funciona na CopyTrader
+            e como funciona na CopyFy
           </h1>
           <p className={`text-base leading-relaxed ${marketingMuted} max-w-2xl`}>
             Copy trading é replicar automaticamente as operações de um trader nas contas de quem o segue. Aqui, tudo

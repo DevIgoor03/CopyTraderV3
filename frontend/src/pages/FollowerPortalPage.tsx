@@ -3,16 +3,24 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, LogOut, Settings, BarChart2, Eye, EyeOff,
   Moon, Sun, CheckCircle, XCircle, Clock, Power, Search,
-  Wallet, Target, ShieldAlert, Copy, Zap, Activity, DollarSign,
+  Wallet, Target, ShieldAlert, Copy, Activity, DollarSign,
   LayoutDashboard, History, RotateCcw, Filter, Users, HelpCircle, ChevronLeft, ArrowRight,
 } from 'lucide-react';
 import { portalApi, portalTokenStore } from '../services/portalApi';
 import { useTheme } from '../hooks/useTheme';
 import { MARKETPLACE_TRADERS_ENABLED } from '../config/features';
 import { InviteBullAuthShell } from '../components/login/InviteBullAuthShell';
+import { CopyFyMark } from '../components/brand/CopyFyLogo';
+import { MobileDockNav, type DockNavItem } from '../components/layout/MobileDockNav';
 import toast from 'react-hot-toast';
 
 type Page = 'overview' | 'history' | 'settings';
+
+const PORTAL_DOCK_ITEMS: DockNavItem[] = [
+  { id: 'overview', label: 'Início', icon: LayoutDashboard },
+  { id: 'history', label: 'Histórico', icon: History },
+  { id: 'settings', label: 'Ajustes', icon: Settings },
+];
 
 interface FollowerData {
   id: string; name: string; email: string;
@@ -220,7 +228,7 @@ export default function FollowerPortalPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resolvedMasterId) { toast.error('ID do copytrader não encontrado na URL'); return; }
+    if (!resolvedMasterId) { toast.error('ID do portal não encontrado na URL'); return; }
     setLogging(true);
     try {
       const data = await portalApi.login(resolvedMasterId, email, password);
@@ -240,7 +248,7 @@ export default function FollowerPortalPage() {
     } catch (err: any) {
       const s = err?.response?.status;
       if (s === 429) toast.error('Muitas tentativas. Aguarde 1 minuto.');
-      else if (s === 404) toast.error('Copytrader não encontrado. Verifique o link.');
+      else if (s === 404) toast.error('Portal não encontrado. Verifique o link.');
       else if (s === 403) {
         toast.error(
           err?.response?.data?.error
@@ -332,7 +340,7 @@ export default function FollowerPortalPage() {
           <div className="inline-flex items-center gap-2 mb-8">
             <div className="w-1.5 h-1.5 rounded-full bg-[oklch(0.62_0.20_152)] animate-pulse" />
             <span className="text-xs font-semibold text-[oklch(0.52_0.018_152)] tracking-[0.15em] uppercase">
-              Portal do seguidor · Bull-ex
+              CopyFy · Portal do seguidor
             </span>
           </div>
 
@@ -506,7 +514,7 @@ export default function FollowerPortalPage() {
     );
 
     return (
-      <InviteBullAuthShell logoLabel="CopyTrader" tickerItems={PORTAL_LOGIN_TICKER}>
+      <InviteBullAuthShell tickerItems={PORTAL_LOGIN_TICKER}>
         {loginGrid}
       </InviteBullAuthShell>
     );
@@ -539,9 +547,9 @@ export default function FollowerPortalPage() {
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
 
       {/* ── Sidebar ── */}
-      <nav className="w-[60px] flex-shrink-0 bg-sidebar flex flex-col items-center h-full py-4 gap-1">
-        <div className="w-9 h-9 rounded-xl bg-brand-gradient flex items-center justify-center mb-4 shadow-glow-brand flex-shrink-0">
-          <TrendingUp className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <nav className="hidden h-full w-[60px] flex-shrink-0 flex-col items-center gap-1 bg-sidebar py-4 md:flex">
+        <div className="mb-4 flex h-10 w-10 flex-shrink-0 items-center justify-center" title="CopyFy">
+          <CopyFyMark className="h-9 w-auto" />
         </div>
 
         <div className="flex flex-col gap-0.5 flex-1 w-full px-2.5">
@@ -586,41 +594,50 @@ export default function FollowerPortalPage() {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* Header */}
-        <header className="flex-shrink-0 h-14 bg-[var(--surface)] border-b border-[var(--border)] flex items-center justify-between px-6 shadow-sm">
-          <div className="min-w-0">
-            <h1 className="text-[var(--text-1)] font-bold text-base leading-tight">{pageTitle[activePage]}</h1>
-            <p className="text-[var(--text-3)] text-xs truncate">
-              {f.name} · {f.email} ·{' '}
+        <header className="flex min-h-14 flex-shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--surface)] px-3 py-2 shadow-sm sm:h-14 sm:flex-nowrap sm:px-6 sm:py-0">
+          <div className="min-w-0 flex-1 sm:flex-none">
+            <h1 className="text-sm font-bold leading-tight text-[var(--text-1)] sm:text-base">{pageTitle[activePage]}</h1>
+            <p className="truncate text-[11px] text-[var(--text-3)] sm:text-xs">
+              <span className="hidden sm:inline">
+                {f.name} · {f.email} ·{' '}
+              </span>
               <span className={copySettings.isActive ? 'text-emerald-500' : 'text-amber-500'}>
-                {copySettings.isActive ? 'Copy ativo hoje' : 'Copy inativo'}
+                {copySettings.isActive ? 'Copy ativo' : 'Copy inativo'}
               </span>
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button onClick={handleToggleCopy} disabled={togglingCopy}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all border ${
+          <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-1 sm:gap-1.5">
+            <button
+              type="button"
+              onClick={handleToggleCopy}
+              disabled={togglingCopy}
+              className={`flex items-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-semibold transition-all sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-xs ${
                 copySettings.isActive
-                  ? 'border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-red-500'
+                  ? 'border-red-300 bg-red-50 text-red-500 dark:border-red-500/30 dark:bg-red-500/10'
                   : 'btn-brand'
-              }`}>
-              {togglingCopy
-                ? <span className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                : <Power className="w-3.5 h-3.5" />}
-              {copySettings.isActive ? 'Pausar copy' : 'Ativar copy'}
+              }`}
+            >
+              {togglingCopy ? (
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current/30 border-t-current" />
+              ) : (
+                <Power className="h-3.5 w-3.5" />
+              )}
+              <span className="max-sm:hidden">{copySettings.isActive ? 'Pausar copy' : 'Ativar copy'}</span>
+              <span className="sm:hidden">{copySettings.isActive ? 'Pausar' : 'Ativar'}</span>
             </button>
-            <button onClick={toggle} className="btn-icon" title="Tema">
-              {isDark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4" />}
+            <button type="button" onClick={toggle} className="btn-icon" title="Tema">
+              {isDark ? <Sun className="h-4 w-4 text-yellow-400" /> : <Moon className="h-4 w-4" />}
             </button>
-            <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-xs font-bold text-white ml-0.5">
+            <div className="ml-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-xs font-bold text-white">
               {f.name.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
-          <div className="p-5 animate-fade-in max-w-[1440px] mx-auto">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+          <div className="mx-auto max-w-[1440px] animate-fade-in p-3 sm:p-5">
 
             {activePage === 'overview' && (
               <OverviewPage
@@ -657,6 +674,16 @@ export default function FollowerPortalPage() {
           </div>
         </main>
       </div>
+
+      <MobileDockNav
+        items={PORTAL_DOCK_ITEMS}
+        activeId={activePage}
+        onSelect={(id) => setActivePage(id as Page)}
+        showLiveOnFirst={copySettings.isActive}
+        onLogout={() => {
+          void handleLogout();
+        }}
+      />
     </div>
   );
 }
@@ -677,7 +704,7 @@ function OverviewPage({ follower: f, balance, winRate, todaySummary, trades, onG
     <div className="space-y-5">
       {/* Greeting */}
       <div>
-        <h2 className="text-2xl font-extrabold text-[var(--text-1)] tracking-tight">
+        <h2 className="text-xl font-extrabold tracking-tight text-[var(--text-1)] sm:text-2xl">
           Olá, {f.name.split(' ')[0]} 👋
         </h2>
         <p className="text-[var(--text-2)] text-sm mt-0.5">
@@ -686,7 +713,7 @@ function OverviewPage({ follower: f, balance, winRate, todaySummary, trades, onG
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
         <PortalStatCard
           title="Saldo da Conta" icon={Wallet} color="blue"
           value={`${f.currency} ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}

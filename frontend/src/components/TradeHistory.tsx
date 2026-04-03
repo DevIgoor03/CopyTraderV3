@@ -25,8 +25,8 @@ export default function TradeHistory({ trades, onClear, compact = false, showCle
   return (
     <div className="card overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-c">
-        <div className="flex items-center gap-4 flex-wrap">
+      <div className="flex flex-col gap-3 border-b border-c px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <div>
             <h3 className="text-c1 font-semibold text-sm">Operações</h3>
             <p className="text-c3 text-xs mt-0.5">{trades.length} registros</p>

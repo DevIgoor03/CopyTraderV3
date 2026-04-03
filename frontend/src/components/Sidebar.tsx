@@ -1,4 +1,5 @@
-import { TrendingUp, LayoutDashboard, Users, History, Settings, LogOut, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Users, History, Settings, LogOut, HelpCircle } from 'lucide-react';
+import { CopyFyMark } from './brand/CopyFyLogo';
 
 interface SidebarProps {
   activePage: string;
@@ -14,34 +15,47 @@ const navItems = [
   { id: 'settings',  label: 'Configurações', icon: Settings },
 ];
 
+const tooltipClass =
+  'pointer-events-none absolute left-full z-50 ml-3 whitespace-nowrap rounded-xl border px-2.5 py-1.5 text-[11px] font-semibold tracking-wide opacity-0 shadow-xl backdrop-blur-md transition-opacity duration-200 group-hover:opacity-100 max-md:ml-2';
+
 export default function Sidebar({ activePage, onPageChange, copyRunning, onLogout }: SidebarProps) {
   return (
-    <nav className="w-[60px] flex-shrink-0 bg-sidebar flex flex-col items-center h-full py-4 gap-1">
-      {/* Logo */}
-      <div className="w-9 h-9 rounded-xl bg-brand-gradient flex items-center justify-center mb-4 shadow-glow-brand flex-shrink-0">
-        <TrendingUp className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+    <nav
+      className="relative z-10 hidden h-full w-[72px] flex-shrink-0 flex-col items-stretch border-r border-[oklch(0.90_0.02_145)]/90 bg-gradient-to-b from-white via-[oklch(0.992_0.006_150)] to-[oklch(0.97_0.012_150)] py-5 shadow-[inset_-1px_0_0_rgba(22,101,52,0.06)] dark:border-white/[0.07] dark:from-[oklch(0.072_0.014_155)] dark:via-[oklch(0.062_0.012_155)] dark:to-[oklch(0.052_0.01_155)] dark:shadow-[inset_-1px_0_0_rgba(255,255,255,0.04),-4px_0_24px_-12px_rgba(0,0,0,0.45)] md:flex"
+      aria-label="Navegação principal"
+    >
+      <div className="mb-6 flex justify-center px-2.5" title="CopyFy">
+        <CopyFyMark className="h-9 w-auto" />
       </div>
 
-      {/* Nav */}
-      <div className="flex flex-col gap-0.5 flex-1 w-full px-2.5">
+      {copyRunning && (
+        <div className="mx-auto mb-5 flex items-center justify-center" title="Copiando ao vivo">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[oklch(0.62_0.20_152)] opacity-40" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[oklch(0.62_0.20_152)] shadow-[0_0_12px_oklch(0.62_0.20_152/0.8)]" />
+          </span>
+        </div>
+      )}
+
+      <div className="flex flex-1 flex-col gap-1 px-2.5">
         {navItems.map(({ id, label, icon: Icon }) => {
           const active = activePage === id;
           return (
             <button
               key={id}
+              type="button"
               onClick={() => onPageChange(id)}
               title={label}
-              className={`relative w-full h-10 flex items-center justify-center rounded-lg transition-all duration-150 group ${
-                active ? 'bg-sidebar-active text-white' : 'text-gray-500 hover:bg-sidebar-hover hover:text-gray-200'
+              className={`group relative flex h-11 w-full items-center justify-center rounded-xl transition-all duration-200 ${
+                active
+                  ? 'bg-[oklch(0.62_0.20_152/0.14)] text-[oklch(0.22_0.06_155)] shadow-[0_0_0_1px_oklch(0.62_0.20_152/0.28),0_8px_24px_-10px_oklch(0.62_0.20_152/0.35)] dark:bg-[oklch(0.62_0.20_152/0.16)] dark:text-[oklch(0.94_0.006_155)] dark:shadow-[0_0_0_1px_oklch(0.62_0.20_152/0.28),0_12px_28px_-12px_oklch(0.62_0.20_152/0.25)]'
+                  : 'text-[oklch(0.48_0.02_150)] hover:bg-black/[0.045] hover:text-[oklch(0.22_0.02_155)] dark:text-[oklch(0.50_0.018_152)] dark:hover:bg-white/[0.07] dark:hover:text-[oklch(0.94_0.006_155)]'
               }`}
             >
-              <Icon className="w-[17px] h-[17px]" strokeWidth={active ? 2.5 : 2} />
-              {active && (
-                <span className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-brand-400" />
-              )}
-              <span className="absolute left-full ml-2.5 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg
-                               opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap
-                               transition-opacity z-50 shadow-lg border border-white/10">
+              <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.5 : 2} />
+              <span
+                className={`${tooltipClass} border-[oklch(0.88_0.02_145)]/90 bg-white/95 text-[oklch(0.22_0.02_155)] dark:border-white/[0.1] dark:bg-[oklch(0.10_0.015_155)] dark:text-[oklch(0.94_0.006_155)]`}
+              >
                 {label}
               </span>
             </button>
@@ -49,22 +63,36 @@ export default function Sidebar({ activePage, onPageChange, copyRunning, onLogou
         })}
       </div>
 
-      {/* Copy running dot */}
-      {copyRunning && (
-        <div className="w-8 h-8 rounded-lg bg-brand-500/15 flex items-center justify-center mb-1" title="Copiando ao vivo">
-          <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse-dot" />
-        </div>
-      )}
+      <div
+        className="mx-3 my-3 h-px bg-gradient-to-r from-transparent via-[oklch(0.88_0.02_145)] to-transparent opacity-80 dark:via-white/[0.12]"
+        aria-hidden
+      />
 
-      {/* Bottom */}
-      <div className="flex flex-col gap-0.5 w-full px-2.5">
-        <button title="Ajuda"
-          className="w-full h-10 flex items-center justify-center rounded-lg text-gray-600 hover:bg-sidebar-hover hover:text-gray-300 transition-all">
-          <HelpCircle className="w-[17px] h-[17px]" strokeWidth={2} />
+      <div className="flex flex-col gap-1 px-2.5">
+        <button
+          type="button"
+          title="Ajuda"
+          className="group relative flex h-11 w-full items-center justify-center rounded-xl text-[oklch(0.48_0.02_150)] transition-all duration-200 hover:bg-black/[0.045] hover:text-[oklch(0.22_0.02_155)] dark:text-[oklch(0.50_0.018_152)] dark:hover:bg-white/[0.07] dark:hover:text-[oklch(0.94_0.006_155)]"
+        >
+          <HelpCircle className="h-[18px] w-[18px]" strokeWidth={2} />
+          <span
+            className={`${tooltipClass} border-[oklch(0.88_0.02_145)]/90 bg-white/95 text-[oklch(0.22_0.02_155)] dark:border-white/[0.1] dark:bg-[oklch(0.10_0.015_155)] dark:text-[oklch(0.94_0.006_155)]`}
+          >
+            Ajuda
+          </span>
         </button>
-        <button onClick={onLogout} title="Sair"
-          className="w-full h-10 flex items-center justify-center rounded-lg text-gray-600 hover:bg-red-500/15 hover:text-red-400 transition-all">
-          <LogOut className="w-[17px] h-[17px]" strokeWidth={2} />
+        <button
+          type="button"
+          onClick={onLogout}
+          title="Sair"
+          className="group relative flex h-11 w-full items-center justify-center rounded-xl text-[oklch(0.48_0.02_150)] transition-all duration-200 hover:bg-red-500/[0.08] hover:text-red-600 dark:text-[oklch(0.50_0.018_152)] dark:hover:bg-red-500/15 dark:hover:text-red-400"
+        >
+          <LogOut className="h-[18px] w-[18px]" strokeWidth={2} />
+          <span
+            className={`${tooltipClass} border-red-200/80 bg-white/95 text-red-700 dark:border-red-500/25 dark:bg-[oklch(0.12_0.04_25)] dark:text-red-300`}
+          >
+            Sair
+          </span>
         </button>
       </div>
     </nav>

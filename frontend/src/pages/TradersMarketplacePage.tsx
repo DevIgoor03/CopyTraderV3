@@ -3,7 +3,7 @@
  * (`MARKETPLACE_TRADERS_ENABLED`); o ficheiro mantém-se para reativar sem reescrever.
  */
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, Users, BarChart2, Zap, ArrowRight,
   Moon, Sun, Star, Shield, Award, Activity, DollarSign, Target,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { portalApi } from '../services/portalApi';
 import { useTheme } from '../hooks/useTheme';
+import { CopyFyLogo } from '../components/brand/CopyFyLogo';
 
 interface Trader {
   id: string;
@@ -272,12 +273,12 @@ export default function TradersMarketplacePage() {
       {/* ── Navbar ── */}
       <nav className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-gradient flex items-center justify-center shadow-md">
-              <TrendingUp className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-            <span className="font-extrabold text-[var(--text-1)] text-base tracking-tight">CopyTrader</span>
-          </div>
+          <Link to="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90" aria-label="CopyFy — início">
+            <CopyFyLogo
+              iconClassName="h-8 w-auto"
+              wordmarkClassName="font-extrabold text-[var(--text-1)] text-base tracking-tight"
+            />
+          </Link>
 
           <div className="flex items-center gap-2">
             <button onClick={toggle} className="btn-icon" title="Alternar tema">

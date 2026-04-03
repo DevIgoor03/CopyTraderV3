@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Users, TrendingUp, Activity, DollarSign, UserPlus,
   BarChart2, Bell, Settings, ExternalLink, Moon, Sun, Link2, Copy, LogOut, AlertTriangle,
+  LayoutDashboard, History,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSocket }    from '../hooks/useSocket.js';
 import { useTheme }     from '../hooks/useTheme.js';
 import { accountsApi, tokenStore, tradesApi } from '../services/api.js';
+import { DashboardInviteBackdrop } from '../components/layout/DashboardInviteBackdrop.js';
 import Sidebar          from '../components/Sidebar.js';
 import StatCard         from '../components/StatCard.js';
 import MasterCard       from '../components/MasterCard.js';
@@ -16,7 +18,15 @@ import FollowerMiniCard from '../components/FollowerMiniCard.js';
 import TradeHistory     from '../components/TradeHistory.js';
 import AddFollowerModal from '../components/AddFollowerModal.js';
 import ConnectMasterModal from '../components/ConnectMasterModal.js';
+import { MobileDockNav, type DockNavItem } from '../components/layout/MobileDockNav.js';
 import { AccountInfo, FollowerAccount, TradeRecord } from '../types/index.js';
+
+const MASTER_DOCK_ITEMS: DockNavItem[] = [
+  { id: 'dashboard', label: 'Início', icon: LayoutDashboard },
+  { id: 'followers', label: 'Seguidores', icon: Users },
+  { id: 'history', label: 'Histórico', icon: History },
+  { id: 'settings', label: 'Ajustes', icon: Settings },
+];
 
 export default function DashboardPage() {
   const navigate          = useNavigate();
@@ -177,75 +187,125 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[var(--bg)]">
-        <div className="w-6 h-6 border-2 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+      <div className="relative flex h-screen items-center justify-center overflow-hidden">
+        <DashboardInviteBackdrop variant={isDark ? 'dark' : 'light'} />
+        <div
+          className={`relative z-10 h-6 w-6 animate-spin rounded-full border-2 ${
+            isDark
+              ? 'border-[oklch(0.62_0.20_152/0.25)] border-t-[oklch(0.62_0.20_152)]'
+              : 'border-gray-200 border-t-brand-600'
+          }`}
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
+    <div className="relative flex h-screen overflow-hidden">
+      <DashboardInviteBackdrop variant={isDark ? 'dark' : 'light'} />
       <Sidebar activePage={activePage} onPageChange={setActivePage} copyRunning={copyRunning} onLogout={handleLogout} />
 
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header className="flex-shrink-0 h-14 bg-[var(--surface)] border-b border-[var(--border)] flex items-center justify-between px-6 shadow-sm">
-          <div className="min-w-0">
-            <h1 className="text-[var(--text-1)] font-bold text-base leading-tight">{pageLabels[activePage]}</h1>
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header
+          className={`flex min-h-14 flex-shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 py-2 backdrop-blur-xl sm:flex-nowrap sm:px-6 sm:py-0 ${
+            isDark
+              ? 'border-b border-white/[0.08] bg-[oklch(0.088_0.01_155/0.82)]'
+              : 'border-b border-gray-200/90 bg-white/80'
+          }`}
+        >
+          <div className="min-w-0 flex-1 sm:flex-none">
+            <h1 className="text-[var(--text-1)] text-sm font-bold leading-tight sm:text-base">{pageLabels[activePage]}</h1>
             {master && (
-              <p className="text-[var(--text-3)] text-xs truncate">
-                {master.name} · <span className={connected ? 'text-emerald-500' : 'text-red-400'}>{connected ? 'Conectado' : 'Reconectando...'}</span>
+              <p className="truncate text-[var(--text-3)] text-[11px] sm:text-xs">
+                {master.name} ·{' '}
+                <span className={connected ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
+                  {connected ? 'Conectado' : 'Reconectando...'}
+                </span>
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          <div className="-mr-1 flex max-w-full flex-shrink-0 flex-wrap items-center justify-end gap-1 sm:flex-nowrap sm:gap-1.5">
             {(!master || !bullexConnected) && (
-              <button onClick={() => setShowConnect(true)}
-                className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-sm">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                {master && !bullexConnected ? 'Reconectar Bullex' : 'Conectar conta Bullex'}
+              <button
+                onClick={() => setShowConnect(true)}
+                className="flex items-center gap-1 rounded-xl bg-amber-500 px-2 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-amber-600 sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-xs"
+              >
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                <span className="max-w-[9rem] truncate sm:max-w-none">
+                  {master && !bullexConnected ? (
+                    <>
+                      <span className="sm:hidden">Bullex</span>
+                      <span className="hidden sm:inline">Reconectar Bullex</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="sm:hidden">Conectar</span>
+                      <span className="hidden sm:inline">Conectar conta Bullex</span>
+                    </>
+                  )}
+                </span>
               </button>
             )}
             {activePage === 'followers' && (
-              <button onClick={() => setShowAddModal(true)} className="btn-brand text-xs px-3.5 py-2">
-                <UserPlus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Adicionar</span>
+              <button onClick={() => setShowAddModal(true)} className="btn-brand px-2 py-1.5 text-[10px] sm:px-3.5 sm:py-2 sm:text-xs">
+                <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden min-[400px]:inline">Adicionar</span>
               </button>
             )}
             <button onClick={toggle} className="btn-icon" title="Alternar tema">
-              {isDark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4" />}
+              {isDark ? <Sun className="h-4 w-4 text-yellow-400" /> : <Moon className="h-4 w-4" />}
             </button>
-            <button className="btn-icon" title="Notificações"><Bell className="w-4 h-4" /></button>
-            <button className="btn-icon" onClick={() => setActivePage('settings')}><Settings className="w-4 h-4" /></button>
+            <button type="button" className="btn-icon hidden sm:flex" title="Notificações">
+              <Bell className="h-4 w-4" />
+            </button>
+            <button type="button" className="btn-icon hidden sm:flex" onClick={() => setActivePage('settings')}>
+              <Settings className="h-4 w-4" />
+            </button>
             {master && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-xs font-bold text-white ml-0.5">
+              <div className="ml-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-bold text-white">
                 {master.name.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0">
           {(!master || !bullexConnected) && (
-            <div className="flex items-center gap-3 px-6 py-3 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <p className="text-sm text-amber-700 dark:text-amber-300 flex-1">
-                {master && !bullexConnected
-                  ? <><strong>Sessão com a corretora expirada.</strong> A ligação foi interrompida (por exemplo após uma atualização). Reconecte para continuar o copy trading.</>
-                  : <><strong>Conta da corretora não conectada.</strong> Para iniciar o copy trading, conecte sua conta Bullex.</>
-                }
+            <div className="flex flex-col gap-2 border-b border-amber-200 bg-amber-50 px-3 py-3 dark:border-amber-500/20 dark:bg-amber-500/10 sm:flex-row sm:items-center sm:gap-3 sm:px-6">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <p className="text-xs text-amber-700 dark:text-amber-300 sm:text-sm">
+                {master && !bullexConnected ? (
+                  <>
+                    <strong>Sessão com a corretora expirada.</strong> Reconecte para continuar o copy trading.
+                  </>
+                ) : (
+                  <>
+                    <strong>Conta da corretora não conectada.</strong> Conecte a Bullex para iniciar.
+                  </>
+                )}
               </p>
-              <button onClick={() => setShowConnect(true)}
-                className="text-xs font-bold text-amber-700 dark:text-amber-300 underline underline-offset-2 flex-shrink-0 hover:text-amber-900 dark:hover:text-amber-100 transition-colors">
+              <button
+                onClick={() => setShowConnect(true)}
+                className="shrink-0 self-start text-xs font-bold text-amber-700 underline underline-offset-2 transition-colors hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100 sm:self-center"
+              >
                 {master && !bullexConnected ? 'Reconectar →' : 'Conectar agora →'}
               </button>
             </div>
           )}
-          <div className="p-5 animate-fade-in max-w-[1440px] mx-auto">
+          <div className="mx-auto max-w-[1440px] animate-fade-in p-3 sm:p-5">
             {renderPage()}
           </div>
         </main>
       </div>
+
+      <MobileDockNav
+        items={MASTER_DOCK_ITEMS}
+        activeId={activePage}
+        onSelect={setActivePage}
+        showLiveOnFirst={copyRunning}
+        onLogout={handleLogout}
+      />
 
       {showAddModal && (
         <AddFollowerModal onClose={() => setShowAddModal(false)} onAdded={handleFollowerAdded} />
@@ -272,13 +332,13 @@ function OverviewPage({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-extrabold text-[var(--text-1)] tracking-tight">
+        <h2 className="text-xl font-extrabold tracking-tight text-[var(--text-1)] sm:text-2xl">
           Bom dia, {master?.name?.split(' ')[0] ?? 'Trader'} 👋
         </h2>
-        <p className="text-[var(--text-2)] text-sm mt-0.5">Monitore e gerencie suas operações em tempo real</p>
+        <p className="mt-0.5 text-sm text-[var(--text-2)]">Monitore e gerencie suas operações em tempo real</p>
       </div>
 
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Lucro da Sessão" value={`${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`} icon={DollarSign} color={totalProfit >= 0 ? 'green' : 'red'} trend={totalProfit > 0 ? 'up' : totalProfit < 0 ? 'down' : 'neutral'} />
         <StatCard title="Seguidores Ativos" value={activeFollowers} subValue={`${followers.length} total`} icon={Users} color="blue" />
         <StatCard title="Operações" value={totalTrades} subValue="nesta sessão" icon={Activity} color="purple" />
@@ -322,13 +382,17 @@ function OverviewPage({
         </div>
 
         <div className="col-span-12 lg:col-span-8 xl:col-span-9 min-w-0 overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="text-[var(--text-1)] font-bold text-base">Últimas Operações</h3>
-              <p className="text-[var(--text-3)] text-xs">Sincronizado em tempo real com a corretora</p>
+              <h3 className="text-base font-bold text-[var(--text-1)]">Últimas Operações</h3>
+              <p className="text-xs text-[var(--text-3)]">Sincronizado em tempo real com a corretora</p>
             </div>
-            <button onClick={() => onNavigate('history')} className="flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 font-semibold flex-shrink-0">
-              Histórico completo <ExternalLink className="w-3 h-3" />
+            <button
+              type="button"
+              onClick={() => onNavigate('history')}
+              className="flex shrink-0 items-center gap-1 text-xs font-semibold text-brand-600 dark:text-brand-400"
+            >
+              Histórico completo <ExternalLink className="h-3 w-3" />
             </button>
           </div>
           <TradeHistory trades={recentTrades} onClear={() => {}} compact={false} />
@@ -419,34 +483,38 @@ function FollowersPage({ followers, onAdd, onRemove, onUpdate, masterId, portalP
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-extrabold text-[var(--text-1)]">Seguidores</h2>
-          <p className="text-[var(--text-2)] text-sm mt-0.5">{followers.length} conta(s)</p>
+          <h2 className="text-xl font-extrabold text-[var(--text-1)] sm:text-2xl">Seguidores</h2>
+          <p className="mt-0.5 text-sm text-[var(--text-2)]">{followers.length} conta(s)</p>
         </div>
-        <button onClick={onAdd} className="btn-brand px-5 py-2.5">
-          <UserPlus className="w-4 h-4" /> Adicionar conta
+        <button type="button" onClick={onAdd} className="btn-brand w-full shrink-0 px-5 py-2.5 sm:w-auto">
+          <UserPlus className="h-4 w-4" /> Adicionar conta
         </button>
       </div>
 
       {/* Portal invite banner */}
-      <div className="card p-4 flex items-center gap-4 border-l-4 border-brand-500">
-        <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-500/15 flex items-center justify-center flex-shrink-0">
-          <Link2 className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+      <div className="card flex flex-col gap-3 border-l-4 border-brand-500 p-4 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/15">
+          <Link2 className="h-5 w-5 text-brand-600 dark:text-brand-400" />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[var(--text-1)] font-semibold text-sm">Portal de auto-cadastro para seguidores</p>
-          <p className="text-[var(--text-3)] text-xs mt-0.5 truncate">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-[var(--text-1)]">Portal de auto-cadastro para seguidores</p>
+          <p className="mt-0.5 break-all text-xs text-[var(--text-3)] sm:truncate">
             <span className="font-mono text-brand-600 dark:text-brand-400">{portalUrl}</span>
           </p>
           {!portalPath && masterId && (
-            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1">
+            <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">
               Link usando ID interno. Peça ao administrador um endereço personalizado (ex.: /portal/seu-nome).
             </p>
           )}
         </div>
-        <button onClick={copyPortalLink} className="flex-shrink-0 flex items-center gap-1.5 text-xs border border-[var(--border)] rounded-lg px-3 py-2 hover:border-brand-400 text-[var(--text-2)] hover:text-brand-600 transition-all">
-          <Copy className="w-3.5 h-3.5" /> Copiar
+        <button
+          type="button"
+          onClick={copyPortalLink}
+          className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-2)] transition-all hover:border-brand-400 hover:text-brand-600 sm:justify-start"
+        >
+          <Copy className="h-3.5 w-3.5" /> Copiar link
         </button>
       </div>
 
@@ -524,13 +592,13 @@ function SettingsPage({ isDark, onToggleTheme, user, onLogout }: { isDark: boole
 
       <div className="card">
         <div className="px-5 py-4 border-b border-[var(--border)]">
-          <h3 className="text-[var(--text-1)] font-semibold">Sobre o CopyTrader</h3>
+          <h3 className="text-[var(--text-1)] font-semibold">Sobre o CopyFy</h3>
         </div>
-        <div className="p-5 grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
           {[
             { k: 'Corretora', v: 'Bull-ex' },
             { k: 'Ligação', v: 'Tempo real com a corretora' },
-            { k: 'Painel', v: 'CopyTrader' },
+            { k: 'Painel', v: 'CopyFy' },
             { k: 'Versão', v: '2.0' },
           ].map(({ k, v }) => (
             <div key={k} className="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5">

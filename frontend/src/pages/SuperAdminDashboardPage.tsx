@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, LogOut, Users, Plus, Trash2, KeyRound, RefreshCw, Mail, User, Moon, Sun, BarChart3, Link2, UserCheck,
+  LogOut, Users, Plus, Trash2, KeyRound, RefreshCw, Mail, User, Moon, Sun, BarChart3, Link2, UserCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminApi, authApi, tokenStore, type CopyPlanTier } from '../services/api';
 import { useTheme } from '../hooks/useTheme';
+import { DashboardInviteBackdrop } from '../components/layout/DashboardInviteBackdrop';
+import { CopyFyMark } from '../components/brand/CopyFyLogo';
 
 interface PlanPublicSpec {
   id: CopyPlanTier;
@@ -258,50 +260,65 @@ export default function SuperAdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)]">
-      <header className="flex-shrink-0 h-14 bg-[var(--surface)] border-b border-[var(--border)] flex items-center justify-between px-6">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center flex-shrink-0">
-            <Shield className="w-4 h-4 text-white" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
+      <DashboardInviteBackdrop variant={isDark ? 'dark' : 'light'} />
+      <header
+        className={`relative z-10 flex min-h-14 flex-shrink-0 flex-wrap items-center justify-between gap-2 px-3 py-2 backdrop-blur-xl sm:h-14 sm:flex-nowrap sm:px-6 sm:py-0 ${
+          isDark
+            ? 'border-b border-white/[0.08] bg-[oklch(0.088_0.01_155/0.82)]'
+            : 'border-b border-gray-200/90 bg-white/80'
+        }`}
+      >
+        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center" title="CopyFy">
+            <CopyFyMark className="h-8 w-auto" />
           </div>
           <div className="min-w-0">
             <h1 className="text-[var(--text-1)] font-bold text-sm truncate">Super Admin</h1>
             <p className="text-[var(--text-3)] text-xs truncate">Contas master da plataforma</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-xs text-[var(--text-3)] hidden sm:inline truncate max-w-[140px]">{user?.email}</span>
+        <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-1 sm:gap-2">
+          <span className="hidden max-w-[140px] truncate text-xs text-[var(--text-3)] sm:inline">{user?.email}</span>
           <button type="button" onClick={toggle} className="btn-icon" title="Tema">
-            {isDark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4" />}
+            {isDark ? <Sun className="h-4 w-4 text-yellow-400" /> : <Moon className="h-4 w-4" />}
           </button>
-          <button type="button" onClick={load} className="btn-icon" title="Atualizar"><RefreshCw className="w-4 h-4" /></button>
-          <button type="button" onClick={handleLogout} className="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 px-3 py-2 rounded-xl">
-            <LogOut className="w-3.5 h-3.5" /> Sair
+          <button type="button" onClick={load} className="btn-icon" title="Atualizar">
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold text-red-500 hover:bg-red-500/10 sm:px-3"
+          >
+            <LogOut className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Sair</span>
           </button>
         </div>
       </header>
 
-      <main className="flex-1 p-5 max-w-6xl mx-auto w-full space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 space-y-4 overflow-y-auto p-3 sm:space-y-5 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-[var(--text-1)]">Operadores (masters)</h2>
-            <p className="text-sm text-[var(--text-2)] mt-0.5">
-              {masters.length} conta(s). Cada uma acessa o painel em <span className="font-mono text-brand-600 dark:text-brand-400">/login</span> e conecta a Bullex depois.
+            <h2 className="text-lg font-extrabold text-[var(--text-1)] sm:text-xl">Operadores (masters)</h2>
+            <p className="mt-0.5 text-sm text-[var(--text-2)]">
+              {masters.length} conta(s). Painel em <span className="font-mono text-brand-600 dark:text-brand-400">/login</span>
+              <span className="hidden sm:inline"> e conexão Bullex depois</span>.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl px-4 py-2.5"
+            className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[oklch(0.62_0.20_152)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 sm:w-auto"
+            style={{ boxShadow: '0 8px 24px oklch(0.62 0.20 152 / 0.28)' }}
           >
-            <Plus className="w-4 h-4" /> Nova conta master
+            <Plus className="h-4 w-4" /> Nova conta master
           </button>
         </div>
 
         {catalog.length > 0 && (
           <div className="card p-5 space-y-3">
             <h3 className="text-sm font-bold text-[var(--text-1)] flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-violet-500" /> Catálogo de planos
+              <BarChart3 className="h-4 w-4 text-[oklch(0.62_0.20_152)]" /> Catálogo de planos
             </h3>
             <div className="grid sm:grid-cols-3 gap-3">
               {catalog.map((p) => (
@@ -336,8 +353,8 @@ export default function SuperAdminDashboardPage() {
               <button type="button" onClick={() => setShowCreate(true)} className="btn-brand px-5 py-2.5 text-sm">Criar conta master</button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="-mx-1 overflow-x-auto px-1 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[720px] text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-[var(--bg)]">
                     <th className="text-left font-semibold text-[var(--text-2)] px-4 py-3">Operador</th>
@@ -375,7 +392,7 @@ export default function SuperAdminDashboardPage() {
                             type="button"
                             disabled={slugSavingId === m.id}
                             onClick={() => { void savePortalSlug(m.id); }}
-                            className="flex-shrink-0 px-2 py-1 rounded-lg text-xs font-semibold bg-violet-600 text-white disabled:opacity-50"
+                            className="flex-shrink-0 rounded-lg bg-[oklch(0.62_0.20_152)] px-2 py-1 text-xs font-semibold text-white disabled:opacity-50 hover:brightness-110"
                           >
                             OK
                           </button>
@@ -421,11 +438,11 @@ export default function SuperAdminDashboardPage() {
                           <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Só login criado</span>
                         ) : (
                           <div className="flex flex-col gap-0.5">
-                            <span className={m.masterAccount.isConnected ? 'text-xs text-emerald-600 dark:text-emerald-400 font-medium' : 'text-xs text-[var(--text-3)]'}>
+                            <span className={m.masterAccount.isConnected ? 'text-xs font-medium text-[oklch(0.72_0.18_155)]' : 'text-xs text-[var(--text-3)]'}>
                               {m.masterAccount.isConnected ? 'Corretora OK' : 'Desconectado'}
                             </span>
                             {m.masterAccount.copyRunning && (
-                              <span className="text-[10px] text-violet-600 dark:text-violet-400 font-medium">Copy ativo</span>
+                              <span className="text-[10px] font-medium text-[oklch(0.62_0.20_152)]">Copy ativo</span>
                             )}
                           </div>
                         )}
@@ -435,7 +452,7 @@ export default function SuperAdminDashboardPage() {
                           <button
                             type="button"
                             onClick={() => openAllowlist(m)}
-                            className="p-2 rounded-lg border border-[var(--border)] hover:border-emerald-500/40 text-[var(--text-2)]"
+                            className="rounded-lg border border-[var(--border)] p-2 text-[var(--text-2)] hover:border-[oklch(0.62_0.20_152/0.4)]"
                             title="Emails Bullex liberados no portal"
                           >
                             <UserCheck className="w-4 h-4" />
@@ -443,7 +460,7 @@ export default function SuperAdminDashboardPage() {
                           <button
                             type="button"
                             onClick={() => { setResetUserId(m.id); setNewPw(''); }}
-                            className="p-2 rounded-lg border border-[var(--border)] hover:border-violet-500/40 text-[var(--text-2)]"
+                            className="rounded-lg border border-[var(--border)] p-2 text-[var(--text-2)] hover:border-[oklch(0.62_0.20_152/0.4)]"
                             title="Redefinir senha do painel"
                           >
                             <KeyRound className="w-4 h-4" />
@@ -470,7 +487,7 @@ export default function SuperAdminDashboardPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
-            <h3 className="text-lg font-bold text-[var(--text-1)] flex items-center gap-2"><User className="w-5 h-5 text-violet-500" /> Nova conta master</h3>
+            <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--text-1)]"><User className="h-5 w-5 text-[oklch(0.62_0.20_152)]" /> Nova conta master</h3>
             <p className="text-xs text-[var(--text-3)]">O operador usará estes dados em <strong>/login</strong> (painel master). A conexão Bullex ele faz depois no dashboard.</p>
             <form onSubmit={handleCreate} className="space-y-3">
               <div>
@@ -499,7 +516,7 @@ export default function SuperAdminDashboardPage() {
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-2)]">Cancelar</button>
-                <button type="submit" disabled={createBusy} className="flex-1 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold disabled:opacity-60">Criar</button>
+                <button type="submit" disabled={createBusy} className="flex-1 rounded-xl bg-[oklch(0.62_0.20_152)] py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60">Criar</button>
               </div>
             </form>
           </div>
@@ -510,7 +527,7 @@ export default function SuperAdminDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-[var(--text-1)] flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-emerald-500" /> Portal — emails liberados
+              <UserCheck className="h-5 w-5 text-[oklch(0.62_0.20_152)]" /> Portal — emails liberados
             </h3>
             <p className="text-xs text-[var(--text-3)]">
               Só quem estiver nesta lista consegue entrar no <span className="font-mono">/portal/…</span> deste operador com o email Bullex indicado.
@@ -531,7 +548,7 @@ export default function SuperAdminDashboardPage() {
               <button
                 type="submit"
                 disabled={allowlistBusy || !allowlistEmail.trim()}
-                className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-50"
+                className="rounded-xl bg-[oklch(0.62_0.20_152)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
               >
                 Adicionar
               </button>
@@ -574,7 +591,7 @@ export default function SuperAdminDashboardPage() {
       {resetUserId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
-            <h3 className="text-lg font-bold text-[var(--text-1)] flex items-center gap-2"><KeyRound className="w-5 h-5 text-violet-500" /> Nova senha do painel</h3>
+            <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--text-1)]"><KeyRound className="h-5 w-5 text-[oklch(0.62_0.20_152)]" /> Nova senha do painel</h3>
             <form onSubmit={handleResetPw} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-[var(--text-2)] mb-1">Nova senha (mín. 8)</label>
@@ -582,7 +599,7 @@ export default function SuperAdminDashboardPage() {
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => { setResetUserId(null); setNewPw(''); }} className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold">Cancelar</button>
-                <button type="submit" disabled={resetBusy} className="flex-1 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold disabled:opacity-60">Salvar</button>
+                <button type="submit" disabled={resetBusy} className="flex-1 rounded-xl bg-[oklch(0.62_0.20_152)] py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60">Salvar</button>
               </div>
             </form>
           </div>

@@ -16,29 +16,29 @@
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02','cv03','cv04','cv11';
 
-    /* Light tokens */
-    --bg:           #f0f2f7;
-    --surface:      #ffffff;
-    --surface-2:    #f8f9fb;
-    --border:       #e5e7eb;
-    --border-subtle:#f3f4f6;
-    --text-1:       #111827;
-    --text-2:       #6b7280;
-    --text-3:       #9ca3af;
-    --shadow-card:  0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    /* Light — alinhado ao login (tinta verde suave), sem “cinza de hospital” */
+    --bg:            oklch(0.965 0.012 150);
+    --surface:       #ffffff;
+    --surface-2:     oklch(0.98 0.01 150);
+    --border:        oklch(0.90 0.02 145);
+    --border-subtle: oklch(0.95 0.008 150);
+    --text-1:        oklch(0.22 0.02 155);
+    --text-2:        oklch(0.45 0.02 150);
+    --text-3:        oklch(0.58 0.02 150);
+    --shadow-card:   0 1px 2px rgba(22, 101, 52, 0.04), 0 4px 20px rgba(22, 101, 52, 0.06);
   }
 
   .dark {
-    /* Dark tokens */
-    --bg:           #0d0d0d;
-    --surface:      #161616;
-    --surface-2:    #1e1e1e;
-    --border:       rgba(255,255,255,0.08);
-    --border-subtle:rgba(255,255,255,0.04);
-    --text-1:       #f1f1f1;
-    --text-2:       #888888;
-    --text-3:       #555555;
-    --shadow-card:  0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.25);
+    /* Mesma base do login (InviteBull / oklch) */
+    --bg:            oklch(0.065 0.01 155);
+    --surface:       oklch(0.088 0.01 155);
+    --surface-2:     oklch(0.095 0.01 155);
+    --border:        rgba(255,255,255,0.08);
+    --border-subtle: rgba(255,255,255,0.05);
+    --text-1:        oklch(0.94 0.006 155);
+    --text-2:        oklch(0.52 0.018 152);
+    --text-3:        oklch(0.45 0.02 152);
+    --shadow-card:   0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 32px rgba(0,0,0,0.35);
   }
 
   html { color-scheme: light; }
@@ -84,15 +84,22 @@
     border-radius: 1rem;
     box-shadow: var(--shadow-card);
   }
+  .dark .card {
+    background: oklch(0.088 0.01 155 / 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 12px 40px rgba(0,0,0,0.35);
+  }
   .card-hover {
     @apply transition-all duration-200;
   }
   .card-hover:hover {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.08);
-    border-color: rgba(132,204,22,0.2);
+    box-shadow: 0 2px 8px rgba(22, 101, 52, 0.08), 0 10px 28px rgba(22, 101, 52, 0.07);
+    border-color: rgba(132, 204, 22, 0.28);
   }
   .dark .card-hover:hover {
-    border-color: rgba(132,204,22,0.15);
+    border-color: oklch(0.62 0.20 152 / 0.35);
   }
 
   /* Surface2 */
@@ -115,6 +122,10 @@
     border-color: #84cc16;
     box-shadow: 0 0 0 3px rgba(132,204,22,0.15);
   }
+  .dark .field:focus {
+    border-color: oklch(0.62 0.20 152);
+    box-shadow: 0 0 0 3px oklch(0.62 0.20 152 / 0.22);
+  }
 
   /* Buttons */
   .btn-brand {
@@ -122,6 +133,17 @@
            px-4 py-2.5 rounded-xl text-sm transition-all duration-150
            disabled:opacity-50 disabled:cursor-not-allowed
            flex items-center justify-center gap-2 shadow-sm;
+  }
+  .dark .btn-brand {
+    background: oklch(0.62 0.20 152);
+    box-shadow: 0 8px 24px oklch(0.62 0.20 152 / 0.28);
+  }
+  .dark .btn-brand:hover {
+    background: oklch(0.58 0.20 152);
+    filter: brightness(1.06);
+  }
+  .dark .btn-brand:active {
+    background: oklch(0.52 0.18 152);
   }
   .btn-white {
     background: var(--surface);
@@ -151,7 +173,7 @@
   .badge-blue   { @apply bg-blue-100   text-blue-700;  }
   .badge-yellow { @apply bg-yellow-100 text-yellow-700; }
   .badge-gray   { @apply bg-gray-100   text-gray-600;  }
-  .dark .badge-green  { background: rgba(132,204,22,0.15); color: #a3e635; }
+  .dark .badge-green  { background: oklch(0.62 0.20 152 / 0.18); color: oklch(0.78 0.20 152); }
   .dark .badge-red    { background: rgba(239,68, 68,0.15);  color: #f87171; }
   .dark .badge-blue   { background: rgba(59,130,246,0.15);  color: #60a5fa; }
   .dark .badge-yellow { background: rgba(234,179,8,0.15);   color: #facc15; }
@@ -174,7 +196,16 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  .dark .text-gradient-brand {
+    background: linear-gradient(135deg, oklch(0.72 0.22 152), oklch(0.65 0.20 175));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   .bg-brand-gradient { background: linear-gradient(135deg, #a3e635 0%, #65a30d 100%); }
+  .dark .bg-brand-gradient {
+    background: linear-gradient(135deg, oklch(0.62 0.20 152), oklch(0.52 0.18 160));
+  }
   .text-c1 { color: var(--text-1); }
   .text-c2 { color: var(--text-2); }
   .text-c3 { color: var(--text-3); }

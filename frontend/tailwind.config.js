@@ -20,9 +20,10 @@ export default {
           600: '#65a30d',
           700: '#4d7c0f',
         },
-        sidebar: '#111827',
-        'sidebar-hover': '#1f2937',
-        'sidebar-active': '#374151',
+        /* Alinhado ao login (oklch) */
+        sidebar: 'oklch(0.055 0.01 155)',
+        'sidebar-hover': 'oklch(0.09 0.015 155)',
+        'sidebar-active': 'oklch(0.62 0.20 152 / 0.18)',
         canvas: '#f0f2f7',
         'canvas-dark': '#0d0d0d',
       },

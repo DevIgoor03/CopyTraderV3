@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Zap } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { CopyFyLogo } from '../brand/CopyFyLogo';
 
 type Props = {
-  logoLabel: string;
   /** Se definido, o logo vira link (ex.: voltar ao início). */
   logoTo?: string;
   /** Links discretos ao lado do logo (ex.: Início, Entrar). */
@@ -18,7 +18,6 @@ type Props = {
 
 /** Shell das páginas de login (grain, aurora, header, marquee). */
 export function InviteBullAuthShell({
-  logoLabel,
   logoTo,
   navLinks,
   adminLink = null,
@@ -65,18 +64,16 @@ export function InviteBullAuthShell({
       <header className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-8 lg:px-12 py-6">
         <div className="flex flex-wrap items-center gap-6 lg:gap-8">
           {logoTo ? (
-            <Link to={logoTo} className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-              <div className="w-7 h-7 rounded-lg bg-[oklch(0.62_0.20_152)] flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5 text-white" fill="white" />
-              </div>
-              <span className="font-display font-bold text-base tracking-tight">{logoLabel}</span>
+            <Link
+              to={logoTo}
+              className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+              aria-label="CopyFy — início"
+            >
+              <CopyFyLogo iconClassName="h-7 w-auto" wordmarkClassName="font-display font-bold text-base tracking-tight text-[oklch(0.94_0.006_155)]" />
             </Link>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-[oklch(0.62_0.20_152)] flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5 text-white" fill="white" />
-              </div>
-              <span className="font-display font-bold text-base tracking-tight">{logoLabel}</span>
+              <CopyFyLogo iconClassName="h-7 w-auto" wordmarkClassName="font-display font-bold text-base tracking-tight text-[oklch(0.94_0.006_155)]" />
             </div>
           )}
           {navLinks && navLinks.length > 0 && (

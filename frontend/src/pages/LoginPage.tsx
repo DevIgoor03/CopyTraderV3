@@ -124,7 +124,7 @@ export default function LoginPage() {
                 Bem-vindo de volta
               </h2>
               <p className="text-xs text-[oklch(0.52_0.018_152)] mt-2 leading-relaxed">
-                Área do operador master. As credenciais são criadas pelo administrador da plataforma CopyTrader.
+                Área do operador master. As credenciais são criadas pelo administrador da plataforma CopyFy.
               </p>
             </div>
 
@@ -205,7 +205,6 @@ export default function LoginPage() {
 
   return (
     <InviteBullAuthShell
-      logoLabel="CopyTrader"
       logoTo="/"
       navLinks={[{ to: '/', label: 'Início' }]}
       adminLink={null}

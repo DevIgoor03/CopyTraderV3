@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Sparkles, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { CopyFyLogo } from '../components/brand/CopyFyLogo';
 import { authApi, tokenStore } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -43,15 +44,17 @@ export default function AdminLoginPage() {
       </div>
 
       <div className="relative w-full max-w-sm z-10">
-        <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-12 h-12 rounded-2xl bg-[oklch(0.62_0.20_152)] flex items-center justify-center mb-4 shadow-lg"
-            style={{ boxShadow: '0 10px 40px oklch(0.62 0.20 152 / 0.3)' }}
-          >
-            <Sparkles className="w-6 h-6 text-white" />
+        <div className="mb-8 flex flex-col items-center">
+          <div className="mb-4">
+            <CopyFyLogo
+              iconClassName="h-12 w-auto"
+              wordmarkClassName="font-display text-2xl font-bold tracking-tight text-[oklch(0.94_0.006_155)]"
+            />
           </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">CopyTrader</h1>
-          <p className="text-sm text-[oklch(0.52_0.018_152)] mt-1">Super administrador da plataforma</p>
+          <h1 className="font-display text-lg font-semibold tracking-tight text-[oklch(0.94_0.006_155)]">
+            Super administrador
+          </h1>
+          <p className="mt-1 text-sm text-[oklch(0.52_0.018_152)]">Acesso restrito à plataforma</p>
         </div>
 
         <div className="relative bg-[oklch(0.095_0.01_155)]/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-7 shadow-2xl shadow-black/30">
@@ -64,7 +67,7 @@ export default function AdminLoginPage() {
             <div>
               <p className="text-sm font-semibold">Acesso restrito</p>
               <p className="text-xs text-[oklch(0.52_0.018_152)]">
-                Gerir operadores master, portais e limites do CopyTrader
+                Gerir operadores master, portais e limites do CopyFy
               </p>
             </div>
           </div>

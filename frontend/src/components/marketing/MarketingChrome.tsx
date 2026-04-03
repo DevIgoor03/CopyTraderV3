@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
+import { CopyFyLogo } from '../brand/CopyFyLogo';
 
 export const marketingBg = 'bg-[oklch(0.065_0.01_155)]';
 export const marketingSurface = 'bg-[oklch(0.095_0.01_155)]/80';
@@ -58,20 +59,6 @@ function NavItem({ href, label }: MarketingNavItem) {
   );
 }
 
-export function LogoMark({ className = '' }: { className?: string }) {
-  return (
-    <div
-      className={`grid grid-cols-2 gap-0.5 w-8 h-8 rotate-45 rounded-sm ${className}`}
-      aria-hidden
-    >
-      <span className="rounded-sm bg-[oklch(0.62_0.20_152)]" />
-      <span className="rounded-sm bg-white/20" />
-      <span className="rounded-sm bg-white/15" />
-      <span className="rounded-sm bg-[oklch(0.62_0.20_152)]/55" />
-    </div>
-  );
-}
-
 export function MarketingHeader({ navItems }: { navItems: MarketingNavItem[] }) {
   return (
     <header
@@ -79,9 +66,13 @@ export function MarketingHeader({ navItems }: { navItems: MarketingNavItem[] }) 
     >
       <div className="mx-auto max-w-7xl px-5 py-4 lg:px-8">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <LogoMark className="group-hover:scale-105 transition-transform" />
-            <span className="font-display text-lg font-bold tracking-tight">CopyTrader</span>
+          <Link to="/" className="flex shrink-0 items-center gap-3 group" aria-label="CopyFy — início">
+            <span className="transition-transform group-hover:scale-[1.02]">
+              <CopyFyLogo
+                iconClassName="h-9 w-auto"
+                wordmarkClassName="font-display text-lg font-bold tracking-tight text-[oklch(0.94_0.006_155)]"
+              />
+            </span>
           </Link>
 
           <nav
@@ -122,7 +113,7 @@ export function MarketingFooter() {
     <footer
       className={`border-t ${marketingBorderSubtle} px-5 py-6 text-center text-xs text-[oklch(0.52_0.018_152)] lg:px-8`}
     >
-      CopyTrader · Copy trading para Bull-ex
+      CopyFy · Copy trading para Bull-ex
     </footer>
   );
 }
