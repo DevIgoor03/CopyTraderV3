@@ -4,19 +4,37 @@ import { ArrowUpRight, Zap } from 'lucide-react';
 
 type Props = {
   logoLabel: string;
+  /** Se definido, o logo vira link (ex.: voltar ao início). */
+  logoTo?: string;
+  /** Links discretos ao lado do logo (ex.: Início, Entrar). */
+  navLinks?: { to: string; label: string }[];
   /** Se omitido ou null, não mostra link no canto superior direito. */
   adminLink?: { to: string; label: string } | null;
   children: ReactNode;
   tickerItems: string[];
+  /** `scroll` — conteúdo longo com scroll; `centered` — padrão login/home. */
+  mainLayout?: 'centered' | 'scroll';
 };
 
 /** Shell das páginas de login (grain, aurora, header, marquee). */
-export function InviteBullAuthShell({ logoLabel, adminLink = null, children, tickerItems }: Props) {
+export function InviteBullAuthShell({
+  logoLabel,
+  logoTo,
+  navLinks,
+  adminLink = null,
+  children,
+  tickerItems,
+  mainLayout = 'centered',
+}: Props) {
   /* Duas sequências idênticas: translateX(-50%) move exatamente um ciclo (loop contínuo). */
   const loop = [...tickerItems, ...tickerItems];
 
+  const rootOverflow = mainLayout === 'scroll' ? 'overflow-x-hidden' : 'overflow-hidden';
+
   return (
-    <div className="login-auth-shell dark min-h-screen bg-[oklch(0.065_0.01_155)] text-[oklch(0.94_0.006_155)] flex flex-col overflow-hidden antialiased font-sans">
+    <div
+      className={`login-auth-shell dark min-h-screen bg-[oklch(0.065_0.01_155)] text-[oklch(0.94_0.006_155)] flex flex-col ${rootOverflow} antialiased font-sans`}
+    >
       <svg className="hidden" aria-hidden>
         <filter id="invite-grain-filter">
           <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" />
@@ -44,12 +62,36 @@ export function InviteBullAuthShell({ logoLabel, adminLink = null, children, tic
         />
       </div>
 
-      <header className="relative z-10 flex items-center justify-between px-8 lg:px-12 py-6">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[oklch(0.62_0.20_152)] flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" fill="white" />
-          </div>
-          <span className="font-display font-bold text-base tracking-tight">{logoLabel}</span>
+      <header className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-8 lg:px-12 py-6">
+        <div className="flex flex-wrap items-center gap-6 lg:gap-8">
+          {logoTo ? (
+            <Link to={logoTo} className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+              <div className="w-7 h-7 rounded-lg bg-[oklch(0.62_0.20_152)] flex items-center justify-center">
+                <Zap className="w-3.5 h-3.5 text-white" fill="white" />
+              </div>
+              <span className="font-display font-bold text-base tracking-tight">{logoLabel}</span>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[oklch(0.62_0.20_152)] flex items-center justify-center">
+                <Zap className="w-3.5 h-3.5 text-white" fill="white" />
+              </div>
+              <span className="font-display font-bold text-base tracking-tight">{logoLabel}</span>
+            </div>
+          )}
+          {navLinks && navLinks.length > 0 && (
+            <nav className="flex flex-wrap items-center gap-4" aria-label="Navegação">
+              {navLinks.map(({ to, label }) => (
+                <Link
+                  key={to + label}
+                  to={to}
+                  className="text-xs font-semibold text-[oklch(0.52_0.018_152)] hover:text-[oklch(0.94_0.006_155)] transition-colors"
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
         {adminLink ? (
           <Link
@@ -64,7 +106,15 @@ export function InviteBullAuthShell({ logoLabel, adminLink = null, children, tic
         )}
       </header>
 
-      <main className="relative z-10 flex-1 flex items-center px-8 lg:px-12 py-8 lg:py-0">{children}</main>
+      <main
+        className={
+          mainLayout === 'scroll'
+            ? 'relative z-10 flex-1 w-full px-8 lg:px-12 py-10 lg:py-14 pb-16'
+            : 'relative z-10 flex-1 flex items-center px-8 lg:px-12 py-8 lg:py-0'
+        }
+      >
+        {children}
+      </main>
 
       <div className="relative z-10 border-t border-white/[0.06] bg-black overflow-hidden py-3">
         {/*

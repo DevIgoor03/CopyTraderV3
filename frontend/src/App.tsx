@@ -7,6 +7,8 @@ import DashboardPage          from './pages/DashboardPage.js';
 import SuperAdminDashboardPage from './pages/SuperAdminDashboardPage.js';
 import FollowerPortalPage     from './pages/FollowerPortalPage.js';
 import TradersMarketplacePage from './pages/TradersMarketplacePage.js';
+import HomePage               from './pages/HomePage.js';
+import CopyTradingGuidePage   from './pages/CopyTradingGuidePage.js';
 import { MARKETPLACE_TRADERS_ENABLED } from './config/features.js';
 
 function MasterProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -25,18 +27,20 @@ function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function RootRedirect() {
+/** Raiz: landing para visitantes; logados vão direto ao painel. */
+function RootEntry() {
   const token = tokenStore.getAccess();
   const user  = tokenStore.getUser();
-  if (!token) return <Navigate to="/login" replace />;
-  if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
-  return <Navigate to="/dashboard" replace />;
+  if (token && user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
+  if (token && user?.role !== 'ADMIN') return <Navigate to="/dashboard" replace />;
+  return <HomePage />;
 }
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/copy-trading" element={<CopyTradingGuidePage />} />
         <Route path="/login"       element={<LoginPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/dashboard"  element={<MasterProtectedRoute><DashboardPage /></MasterProtectedRoute>} />
@@ -47,13 +51,13 @@ export default function App() {
             MARKETPLACE_TRADERS_ENABLED ? (
               <TradersMarketplacePage />
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
         <Route path="/portal/:masterId" element={<FollowerPortalPage />} />
-        <Route path="/portal" element={<Navigate to="/login" replace />} />
-        <Route path="/"            element={<RootRedirect />} />
+        <Route path="/portal" element={<Navigate to="/" replace />} />
+        <Route path="/"            element={<RootEntry />} />
         <Route path="*"            element={<Navigate to="/" replace />} />
       </Routes>
 

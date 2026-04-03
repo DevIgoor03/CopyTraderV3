@@ -204,7 +204,13 @@ export default function LoginPage() {
   );
 
   return (
-    <InviteBullAuthShell logoLabel="CopyTrader" adminLink={{ to: '/admin/login', label: 'Área admin' }} tickerItems={TICKER}>
+    <InviteBullAuthShell
+      logoLabel="CopyTrader"
+      logoTo="/"
+      navLinks={[{ to: '/', label: 'Início' }]}
+      adminLink={null}
+      tickerItems={TICKER}
+    >
       {grid}
     </InviteBullAuthShell>
   );
